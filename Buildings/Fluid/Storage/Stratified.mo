@@ -1,6 +1,7 @@
 within Buildings.Fluid.Storage;
 model Stratified "Model of a stratified tank for thermal energy storage"
-  extends Buildings.Fluid.Interfaces.PartialTwoPortInterface;
+  extends Buildings.Fluid.Interfaces.PartialTwoPortInterface(
+      showDesignFlowDirection=false);
 
   replaceable package Medium =
       Modelica.Media.Interfaces.PartialSimpleMedium;
@@ -72,15 +73,16 @@ model Stratified "Model of a stratified tank for thermal energy storage"
     each X_start=X_start,
     each C_start=C_start,
     each V=VTan/nSeg,
-    each nPorts=nPorts,
+    nPorts=nPorts,
     each m_flow_nominal = m_flow_nominal,
     each final mSenFac=1,
     each final m_flow_small=m_flow_small,
     each final allowFlowReversal=allowFlowReversal) "Tank segment"
       annotation (Placement(transformation(extent={{6,-16},{26,4}})));
-protected
-  constant Integer nPorts = 2 "Number of ports of volume";
 
+  parameter Integer nPorts[nSeg] = {2 for i in 1:nSeg}
+    "Number of ports of volume";
+protected
   parameter Medium.ThermodynamicState sta_default = Medium.setState_pTX(
     T=Medium.T_default,
     p=Medium.p_default,
