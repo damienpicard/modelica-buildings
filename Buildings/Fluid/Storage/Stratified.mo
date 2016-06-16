@@ -245,6 +245,10 @@ Buildings.Fluid.Storage.StratifiedEnhanced</a>.
 </html>", revisions="<html>
 <ul>
 <li>
+June 16, 2015, by Damien Picard:<br/>
+Add parameter vector nPorts to position extra inlet/outlet to mixing volumes.
+</li>
+<li>
 March 28, 2015, by Filip Jorissen:<br/>
 Propagated <code>allowFlowReversal</code> and <code>m_flow_small</code>
 and set <code>mSenFac=1</code>.
