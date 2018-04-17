@@ -10,7 +10,7 @@ model Outside_CpLowRise
     Cp0=0.6) "Model with outside conditions"
     annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
-    filNam="modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos")
+    filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos"))
     annotation (Placement(transformation(extent={{-80,0},{-60,20}})));
   Buildings.Fluid.Sources.Outside_CpLowRise north(
     redeclare package Medium = Medium,
@@ -69,7 +69,7 @@ whereas it is negative for the south- and east-facing facades.
 December 22, 2014 by Michael Wetter:<br/>
 Removed <code>Modelica.Fluid.System</code>
 to address issue
-<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/311\">#311</a>.
+<a href=\"https://github.com/lbl-srg/modelica-Buildings/issues/311\">#311</a>.
 </li>
 <li>
 October 26, 2011 by Michael Wetter:<br/>
@@ -80,5 +80,5 @@ First implementation.
     experiment(
       StartTime=1.728e+07,
       StopTime=1.78848e+07,
-      Tolerance=1e-05));
+      Tolerance=1e-6));
 end Outside_CpLowRise;

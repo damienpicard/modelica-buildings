@@ -14,7 +14,7 @@ model WindTurbine "Example for the WindTurbine AC model"
         origin={60,0})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
       computeWetBulbTemperature=false,
-      filNam="modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos")
+      filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos"))
     "Weather data"
     annotation (Placement(transformation(extent={{-52,36},{-32,56}})));
   Buildings.BoundaryConditions.WeatherData.Bus weaBus "Weather bus"
@@ -60,7 +60,7 @@ equation
       points={{28,0},{50,0}},
       color={0,120,120},
       smooth=Smooth.None));
-  annotation (    experiment(StopTime=172800, Tolerance=1e-05),
+  annotation (    experiment(StopTime=172800, Tolerance=1e-6),
 Documentation(info="<html>
 <p>
 This model illustrates the use of the wind turbine model,
@@ -81,6 +81,6 @@ Created model and documentation
 </ul>
 </html>"),
     __Dymola_Commands(file=
-          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesBalanced/Sources/Examples/WindTurbineAC.mos"
+          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesBalanced/Sources/Examples/WindTurbine.mos"
         "Simulate and plot"));
 end WindTurbine;

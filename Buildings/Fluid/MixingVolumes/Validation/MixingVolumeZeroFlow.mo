@@ -27,7 +27,7 @@ model MixingVolumeZeroFlow
     duration=1,
     offset=1) "Mass flow rate ramp input"
     annotation (Placement(transformation(extent={{-100,-20},{-80,0}})));
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHea2
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHea2
     "Prescribed heat flow"
     annotation (Placement(transformation(extent={{-40,50},{-20,70}})));
   Modelica.Blocks.Sources.RealExpression reaExp(y=(290 - volNonLinSys.heatPort.T)
@@ -86,11 +86,9 @@ model MixingVolumeZeroFlow
     offset=283.15,
     height=0) "Temperature ramp input"
     annotation (Placement(transformation(extent={{-100,-60},{-80,-40}})));
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHea1
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHea1
     "Prescribed heat flow"
     annotation (Placement(transformation(extent={{-40,70},{-20,90}})));
-  Modelica.Blocks.Sources.Constant const(k=1) "Constant heat flow rate input"
-    annotation (Placement(transformation(extent={{-76,74},{-64,86}})));
   Buildings.Fluid.MixingVolumes.MixingVolume volQflow(
     nPorts=2,
     redeclare package Medium = Medium,
@@ -108,11 +106,10 @@ model MixingVolumeZeroFlow
     use_m_flow_in=true,
     use_T_in=true) "Source"
     annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
+  Modelica.Blocks.Routing.RealPassThrough reaPasThr
+    "Real pass through for unit conversion"
+    annotation (Placement(transformation(extent={{-66,74},{-54,86}})));
 equation
-  assert(abs(volNonLinSys.heatPort.Q_flow)<Modelica.Constants.small or time<1,
-    "Heat flow leakage around zero flow.");
-  assert(abs(volLinSys.heatPort.Q_flow)<Modelica.Constants.small or time<1,
-    "Heat flow leakage around zero flow.");
   connect(sou2.ports[1], volNonLinSys.ports[1]) annotation (Line(points={{-40,-22},
           {-40,-20},{-2,-20}}, color={0,127,255}));
   connect(volNonLinSys.ports[2], sin.ports[1]) annotation (Line(points={{2,-20},
@@ -141,22 +138,24 @@ equation
   connect(volNonLinSys.heatPort, preHea2.port) annotation (Line(points={{-10,-10},
           {-10,-10},{-14,-10},{-14,60},{-20,60}},
                                               color={191,0,0}));
-  connect(const.y, preHea1.Q_flow) annotation (Line(points={{-63.4,80},{-63.4,
-          80},{-40,80}}, color={0,0,127}));
   connect(volQflow.heatPort, preHea1.port)
     annotation (Line(points={{-10,20},{-10,80},{-20,80}}, color={191,0,0}));
   connect(sou1.ports[1], volQflow.ports[1]) annotation (Line(points={{-40,10},{
           -28,10},{-2,10}},      color={0,127,255}));
   connect(volQflow.ports[2], sin.ports[4])
     annotation (Line(points={{2,10},{20,10},{20,-37}}, color={0,127,255}));
-  connect(ramp_m_flow.y, sou1.m_flow_in) annotation (Line(points={{-79,-10},{-72,
-          -10},{-72,18},{-60,18}}, color={0,0,127}));
-  connect(ramp_m_flow.y, sou2.m_flow_in) annotation (Line(points={{-79,-10},{-72,
-          -10},{-72,-14},{-60,-14}}, color={0,0,127}));
-  connect(ramp_m_flow.y, sou3.m_flow_in) annotation (Line(points={{-79,-10},{-72,
-          -10},{-72,-42},{-60,-42}}, color={0,0,127}));
-  connect(ramp_m_flow.y, sou4.m_flow_in) annotation (Line(points={{-79,-10},{-72,
-          -10},{-72,-82},{-60,-82}}, color={0,0,127}));
+  connect(ramp_m_flow.y, sou1.m_flow_in) annotation (Line(points={{-79,-10},{
+          -72,-10},{-72,18},{-62,18}},
+                                   color={0,0,127}));
+  connect(ramp_m_flow.y, sou2.m_flow_in) annotation (Line(points={{-79,-10},{
+          -72,-10},{-72,-14},{-62,-14}},
+                                     color={0,0,127}));
+  connect(ramp_m_flow.y, sou3.m_flow_in) annotation (Line(points={{-79,-10},{
+          -72,-10},{-72,-42},{-62,-42}},
+                                     color={0,0,127}));
+  connect(ramp_m_flow.y, sou4.m_flow_in) annotation (Line(points={{-79,-10},{
+          -72,-10},{-72,-82},{-62,-82}},
+                                     color={0,0,127}));
   connect(ramp_T.y, sou1.T_in) annotation (Line(points={{-79,-50},{-74,-50},{-68,
           -50},{-68,14},{-62,14}}, color={0,0,127}));
   connect(ramp_T.y, sou2.T_in) annotation (Line(points={{-79,-50},{-68,-50},{-68,
@@ -165,6 +164,10 @@ equation
           -46},{-62,-46}}, color={0,0,127}));
   connect(ramp_T.y, sou4.T_in) annotation (Line(points={{-79,-50},{-68,-50},{-68,
           -86},{-62,-86}}, color={0,0,127}));
+  connect(reaPasThr.y, preHea1.Q_flow)
+    annotation (Line(points={{-53.4,80},{-40,80}}, color={0,0,127}));
+  connect(reaPasThr.u, ramp_m_flow.y)
+    annotation (Line(points={{-67.2,80},{-79,80},{-79,-10}}, color={0,0,127}));
   annotation (                                                         Diagram(
         coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,100}}),
                     graphics={Text(
@@ -172,11 +175,28 @@ equation
           lineColor={28,108,200},
           textString="<- vol.prescribedHeatFlowRate = true")}),
     experiment(
-      StopTime=2),
+      Tolerance=1E-6, StopTime=2),
     Documentation(revisions="<html>
 <ul>
 <li>
-January 27, 2016, by Michael Wetter;<br/>
+January 27, 2016, by Filip Jorissen:<br/>
+Changed heat flow rate at zero flow to avoid triggering of
+conservation of energy check.
+This is for
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/470\">
+issue 470</a>.
+</li>
+<li>
+November 2, 2016, by Michael Wetter:<br/>
+Removed assertion as the variable that are tested are already
+part of the regression test.
+Also, the previous implementation mixed graphical with textual programming,
+which we try to avoid.<br/>
+This is for
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/441\">issue 441</a>.
+</li>
+<li>
+January 27, 2016, by Michael Wetter:<br/>
 Removed algorithm specification in experiment annotation.
 </li>
 <li>
@@ -187,7 +207,7 @@ Revised example.
 June 30, 2015 by Filip Jorissen:<br/>
 First implementation
 to test
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/282\">
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/282\">
 issue 282</a>.
 </li>
 </ul>

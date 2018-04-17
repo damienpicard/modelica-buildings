@@ -2,10 +2,10 @@ within Buildings.HeatTransfer.Windows.Examples;
 model ElectrochromicWindow "Electrochromic window"
   extends Window(
     redeclare Data.GlazingSystems.DoubleElectrochromicAir13Clear glaSys,
-    uSha(
-      height=0,
-      duration=0,
-      startTime=0));
+      uSha(
+        height=0,
+        duration=0,
+        startTime=0));
   Modelica.Blocks.Sources.Ramp uWin(duration=0.5, startTime=0.25)
     "Window control signal"
     annotation (Placement(transformation(extent={{-80,-80},{-60,-60}})));
@@ -14,7 +14,7 @@ equation
           114.8,-70},{114.8,-21.6}}, color={0,0,127}));
   annotation (Diagram(coordinateSystem(preserveAspectRatio=false,extent={{-100,
             -100},{340,200}})),
-experiment(StopTime=1.0),
+experiment(Tolerance=1e-6, StopTime=1.0),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/HeatTransfer/Windows/Examples/ElectrochromicWindow.mos"
         "Simulate and plot"),
     Documentation(

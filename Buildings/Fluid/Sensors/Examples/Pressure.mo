@@ -19,7 +19,7 @@ model Pressure "Test model for the pressure sensor"
      annotation (Placement(transformation(
           extent={{-52,-10},{-32,10}})));
 
-  Buildings.Fluid.FixedResistances.FixedResistanceDpM dp(
+  Buildings.Fluid.FixedResistances.PressureDrop dp(
     redeclare package Medium = Medium,
     m_flow_nominal=10,
     dp_nominal=200) "Flow resistance"
@@ -40,7 +40,7 @@ model Pressure "Test model for the pressure sensor"
     annotation (Placement(transformation(extent={{-2,-50},{18,-30}})));
 equation
   connect(ramp.y, masFloRat.m_flow_in) annotation (Line(
-      points={{-69,8},{-52,8}},
+      points={{-69,8},{-54,8}},
       color={0,0,127}));
   connect(masFloRat.ports[1], dp.port_a) annotation (Line(
       points={{-32,0},{-18,0},{-18,6.66134e-16},{-2,6.66134e-16}},
@@ -61,7 +61,7 @@ equation
   connect(senRelPre.port_b, dp.port_b) annotation (Line(
       points={{18,-40},{30,-40},{30,0},{18,0}},
       color={0,127,255}));
-    annotation (experiment(StopTime=1),
+    annotation (experiment(Tolerance=1e-6, StopTime=1),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Sensors/Examples/Pressure.mos"
         "Simulate and plot"),
     Documentation(info="<html>

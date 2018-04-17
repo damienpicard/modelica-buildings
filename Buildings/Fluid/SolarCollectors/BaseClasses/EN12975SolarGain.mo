@@ -3,6 +3,9 @@ model EN12975SolarGain "Model calculating solar gains per the EN12975 standard"
   extends Modelica.Blocks.Icons.Block;
   extends SolarCollectors.BaseClasses.PartialParameters;
 
+  replaceable package Medium = Modelica.Media.Interfaces.PartialMedium
+    "Medium in the system";
+
   parameter Real B0 "1st incident angle modifer coefficient";
   parameter Real B1 "2nd incident angle modifer coefficient";
   parameter Boolean use_shaCoe_in = false
@@ -12,10 +15,9 @@ model EN12975SolarGain "Model calculating solar gains per the EN12975 standard"
     min=0.0,
     max=1.0) = 0 "Shading coefficient 0.0: no shading, 1.0: full shading"
     annotation(Dialog(enable = not use_shaCoe_in,group="Shading"));
+
   parameter Real iamDiff "Incidence angle modifier for diffuse radiation";
 
-  replaceable package Medium = Modelica.Media.Interfaces.PartialMedium
-    "Medium in the system";
   Modelica.Blocks.Interfaces.RealInput shaCoe_in if use_shaCoe_in
     "Time varying input for the shading coefficient"
     annotation(Placement(transformation(extent={{-140,-60},{-100,-20}})));
@@ -39,11 +41,11 @@ model EN12975SolarGain "Model calculating solar gains per the EN12975 standard"
   Modelica.Blocks.Interfaces.RealInput TFlu[nSeg](
      unit="K",
      displayUnit="degC",
-     quantity="Temperature")
+     quantity="ThermodynamicTemperature")
     annotation (Placement(transformation(extent={{-140,-100},{-100,-60}})));
 
 protected
-  constant Modelica.SIunits.Temperature dTMax = 1
+  constant Modelica.SIunits.TemperatureDifference dTMax = 1
     "Safety temperature difference to prevent TFlu > Medium.T_max";
   final parameter Modelica.SIunits.Temperature TMedMax = Medium.T_max-dTMax
     "Fluid temperature above which there will be no heat gain computed to prevent TFlu > Medium.T_max";
@@ -56,15 +58,10 @@ equation
   connect(shaCoe_internal, shaCoe_in);
 
   // E+ Equ (555)
-  iamBea = Buildings.Utilities.Math.Functions.smoothHeaviside(x=Modelica.Constants.pi
-    /3 - incAng, delta=Modelica.Constants.pi/60)*
-    SolarCollectors.BaseClasses.IAM(
-    incAng,
-    B0,
-    B1);
+  iamBea = SolarCollectors.BaseClasses.IAM(incAng, B0, B1);
+
   // Modified from EnergyPlus Equ (559) by applying shade effect for direct solar radiation
   // Only solar heat gain is considered here
-
   if not use_shaCoe_in then
     shaCoe_internal = shaCoe;
   end if;
@@ -134,7 +131,7 @@ equation
       <p>
         This model reduces the heat gain rate to 0 W when the fluid temperature is
         within 1 degree C of the maximum temperature of the medium model. The
-        calucation is performed using the
+        calculation is performed using the
         <a href=\"modelica://Buildings.Utilities.Math.Functions.smoothHeaviside\">
         Buildings.Utilities.Math.Functions.smoothHeaviside</a> function.
       </p>
@@ -148,6 +145,20 @@ equation
     revisions="<html>
 <ul>
 <li>
+May 31, 2017, by Michael Wetter and Filip Jorissen:<br/>
+Change limits for incident angle modifier to avoid dip in temperature
+at shallow incidence angles.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/785\">issue 785</a>.
+</li>
+<li>
+September 17, 2016, by Michael Wetter:<br/>
+Corrected quantity from <code>Temperature</code> to <code>ThermodynamicTemperature</code>
+to avoid an error in the pedantic model check in Dymola 2017 FD01 beta2.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/557\">issue 557</a>.
+</li>
+<li>
 June 29, 2015, by Michael Wetter:<br/>
 Revised implementation of heat loss near <code>Medium.T_max</code>
 to make it more efficient.
@@ -155,7 +166,7 @@ to make it more efficient.
 <li>
 June 29, 2015, by Filip Jorissen:<br/>
 Fixed sign mistake causing model to fail under high
-solar irradiation because temperature goes above 
+solar irradiation because temperature goes above
 medium temperature bound.
 </li>
 <li>

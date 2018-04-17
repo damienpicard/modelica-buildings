@@ -1,12 +1,14 @@
 UsersGuide
+Air
 Airflow
+Applications
 BoundaryConditions
 Controls
 Electrical
 Fluid
 HeatTransfer
 Media
-Rooms
+ThermalZones
 Utilities
 Types
 Examples

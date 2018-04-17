@@ -34,7 +34,7 @@ model SpecificEnthalpy "Test model for the enthalpy flow rate sensors"
     annotation (Placement(transformation(extent={{20,-22},{40,-2}})));
 equation
   connect(ramp.y, sou.m_flow_in) annotation (Line(
-      points={{-59,-2},{-40,-2}},
+      points={{-59,-2},{-42,-2}},
       color={0,0,127}));
   connect(sou.ports[1], senFloSou.port) annotation (Line(
       points={{-20,-8},{0,-8},{0,0}},
@@ -46,7 +46,7 @@ equation
       points={{40,-12},{60,-12}},
       color={0,127,255}));
     annotation (
-experiment(StopTime=1.0),
+experiment(Tolerance=1e-6, StopTime=60),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Sensors/Examples/SpecificEnthalpy.mos"
         "Simulate and plot"),    Documentation(info="<html>
 <p>

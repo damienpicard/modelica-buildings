@@ -4,6 +4,9 @@ block ASHRAESolarGain
   extends Modelica.Blocks.Icons.Block;
   extends SolarCollectors.BaseClasses.PartialParameters;
 
+  replaceable package Medium = Modelica.Media.Interfaces.PartialMedium
+    "Medium in the system";
+
   parameter Real B0 "1st incident angle modifer coefficient";
   parameter Real B1 "2nd incident angle modifer coefficient";
   parameter Boolean use_shaCoe_in = false "Enable input connector for shaCoe"
@@ -16,16 +19,13 @@ block ASHRAESolarGain
 
   parameter Modelica.SIunits.Angle til "Surface tilt";
 
-  replaceable package Medium = Modelica.Media.Interfaces.PartialMedium
-    "Medium in the system";
-
   Modelica.Blocks.Interfaces.RealInput shaCoe_in if use_shaCoe_in
     "Shading coefficient"
     annotation(Placement(transformation(extent={{-140,-70},{-100,-30}})));
    Modelica.Blocks.Interfaces.RealInput TFlu[nSeg](
    each unit = "K",
    each displayUnit="degC",
-   each quantity="Temperature")
+   each quantity="ThermodynamicTemperature")
    annotation (Placement(transformation(extent={{-140,-100},{-100,-60}})));
    Modelica.Blocks.Interfaces.RealInput HSkyDifTil(
      unit="W/m2", quantity="RadiantEnergyFluenceRate")
@@ -49,7 +49,7 @@ block ASHRAESolarGain
     annotation (Placement(transformation(extent={{100,-10},{120,10}})));
 
 protected
-  constant Modelica.SIunits.Temperature dTMax = 1
+  constant Modelica.SIunits.TemperatureDifference dTMax = 1
     "Safety temperature difference to prevent TFlu > Medium.T_max";
   final parameter Modelica.SIunits.Temperature TMedMax = Medium.T_max-dTMax
     "Fluid temperature above which there will be no heat gain computed to prevent TFlu > Medium.T_max";
@@ -72,7 +72,7 @@ protected
   final parameter Real HMinDel = 0.001
     "Delta of the smoothing function for HTot";
 
-  Real iamBea "Incident angle modifier for director solar radiation";
+  Real iamBea "Incident angle modifier for direct solar radiation";
   Real iam "Weighted incident angle modifier";
 
   Modelica.Blocks.Interfaces.RealInput shaCoe_internal
@@ -104,24 +104,17 @@ equation
   end if;
 
   // E+ Equ (555)
-  iamBea = Buildings.Utilities.Math.Functions.smoothHeaviside(1/3*
-  Modelica.Constants.pi- incAng, Modelica.Constants.pi/60)*
-  SolarCollectors.BaseClasses.IAM(
-    incAng,
-    B0,
-    B1);
+  iamBea = SolarCollectors.BaseClasses.IAM(incAng, B0, B1);
   // E+ Equ (556)
-  iam = Buildings.Utilities.Math.Functions.smoothHeaviside(
-      1/3*Modelica.Constants.pi-incAng,Modelica.Constants.pi/60)*
-      ((HDirTil*iamBea + HSkyDifTil*iamSky + HGroDifTil*iamGro)/
-      Buildings.Utilities.Math.Functions.smoothMax((HDirTil +
-      HSkyDifTil + HGroDifTil), HTotMin, HMinDel));
+  iam = (HDirTil*iamBea + HSkyDifTil*iamSky + HGroDifTil*iamGro)/
+      Buildings.Utilities.Math.Functions.smoothMax((
+        HDirTil + HSkyDifTil + HGroDifTil), HTotMin, HMinDel);
   // Modified from EnergyPlus Equ (559) by applying shade effect for
   //direct solar radiation
   // Only solar heat gain is considered here
   for i in 1 : nSeg loop
-    QSol_flow[i] = A_c/nSeg*(y_intercept*iam*(HDirTil*(1.0 -
-    shaCoe_internal) + HSkyDifTil + HGroDifTil))*
+    QSol_flow[i] = A_c/nSeg*(y_intercept*iam*
+      (HDirTil*(1.0 - shaCoe_internal) + HSkyDifTil + HGroDifTil))*
       smooth(1, if TFlu[i] < TMedMax2
         then 1
         else Buildings.Utilities.Math.Functions.smoothHeaviside(TMedMax-TFlu[i], dTMax));
@@ -150,7 +143,7 @@ equation
         where <i>Q<sub>Flow</sub>[i]</i> is the heat gain in each segment, <i>A<sub>
         c</sub></i> is the area of the collector, <i>nSeg</i> is the user-specified
         number of segments in the simulation, <i>F<sub>R</sub>(&tau;&alpha;)</i> is
-        the maximum collector efficiency, <i>K<sub>(&tau;&alpha;)<sub>net></sub>
+        the maximum collector efficiency, <i>K<sub>(&tau;&alpha;)<sub>net</sub>
         </sub></i> is the incidence angle modifier, <i>G<sub>Dir</sub></i> is the
         direct solar radiation, <i>shaCoe</i> is the user-specified shading
         coefficient, <i>G<sub>Dif,Sky</sub></i> is the diffuse solar radiation from
@@ -213,7 +206,7 @@ equation
       </p>
       <p>
         This model reduces the heat gain rate to 0 W when the fluid temperature is within 1 degree
-        C of the maximum temperature of the medium model. The calucation is performed using the
+        C of the maximum temperature of the medium model. The calculation is performed using the
         <a href=\"modelica://Buildings.Utilities.Math.Functions.smoothHeaviside\">
         Buildings.Utilities.Math.Functions.smoothHeaviside</a> function.
       </p>
@@ -227,6 +220,20 @@ equation
     </html>",
     revisions="<html>
     <ul>
+<li>
+May 31, 2017, by Michael Wetter and Filip Jorissen:<br/>
+Change limits for incident angle modifier to avoid dip in temperature
+at shallow incidence angles.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/785\">issue 785</a>.
+</li>
+<li>
+September 17, 2016, by Michael Wetter:<br/>
+Corrected quantity from <code>Temperature</code> to <code>ThermodynamicTemperature</code>
+to avoid an error in the pedantic model check in Dymola 2017 FD01 beta2.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/557\">issue 557</a>.
+</li>
 <li>
 June 29, 2015, by Michael Wetter:<br/>
 Revised implementation of heat loss near <code>Medium.T_max</code>

@@ -5,7 +5,7 @@
 ::*******************************************************************
 set DIR=..\..\Library\win32
 set MSbuildName=ffd
-set BuildConfiguration=Debug
+set BuildConfiguration=Release
 set Platform=Win32
 ::Note: Two build mode, Debug or Release
 
@@ -142,6 +142,7 @@ msbuild %MSbuildName%.vcxproj /t:rebuild /p:PlatformToolset=%Toolset%;Configurat
 ::*******************************************************************
 echo Copy %MSbuildName%.dll and %MSbuildName%.lib to %DIR%
 copy "%BuildConfiguration%\%MSbuildName%.dll" "%DIR%" /Y
+copy "%BuildConfiguration%\%MSbuildName%.lib" "%DIR%" /Y
 ::Note: /y: Suppresses prompting to confirm that you want to overwrite an existing destination file.
 
 ::*******************************************************************

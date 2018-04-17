@@ -94,6 +94,15 @@ protected
   final parameter Real fReg = 104*deltaInvReg^6
     "Polynomial coefficient for inverseXRegularized";
 
+  final parameter Medium.ThermodynamicState state_default = Medium.setState_pTX(
+      T=Medium.T_default,
+      p=Medium.p_default,
+      X=Medium.X_default[1:Medium.nXi]) "Medium state at default values";
+  // Density at medium default values, used to compute the size of control volumes
+  final parameter Modelica.SIunits.SpecificHeatCapacity cp_default=
+    Medium.specificHeatCapacityCp(state=state_default)
+    "Specific heat capacity, used to verify energy conservation";
+
   // Conditional connectors
   Modelica.Blocks.Interfaces.RealInput mWat_flow_internal(unit="kg/s")
     "Needed to connect to conditional connector";
@@ -134,6 +143,12 @@ equation
     m_flowInv = 0;
   end if;
 
+  if prescribedHeatFlowRate then
+    assert(noEvent( abs(Q_flow) < 200*cp_default*max(m_flow_small/1E3, abs(m_flow))),
+   "In " + getInstanceName() + ": Energy may not be conserved for small mass flow rates. 
+   The implementation may require prescribedHeatFlowRate = false.");
+  end if;
+
   if allowFlowReversal then
     // Formulate hOut using spliceFunction. This avoids an event iteration.
     // The introduced error is small because deltax=m_flow_small/1e3
@@ -166,7 +181,7 @@ equation
     if use_m_flowInv then
       port_b.Xi_outflow = inStream(port_a.Xi_outflow) + mXi_flow * m_flowInv;
     else // no water is added
-      assert(use_mWat_flow == false, "Wrong implementation for forward flow.");
+      assert(use_mWat_flow == false, "In " + getInstanceName() + ": Wrong implementation for forward flow.");
       port_b.Xi_outflow = inStream(port_a.Xi_outflow);
     end if;
 
@@ -175,7 +190,7 @@ equation
       if use_m_flowInv then
         port_a.Xi_outflow = inStream(port_b.Xi_outflow) - mXi_flow * m_flowInv;
       else // no water added
-        assert(use_mWat_flow == false, "Wrong implementation for reverse flow.");
+        assert(use_mWat_flow == false, "In " + getInstanceName() + ": Wrong implementation for reverse flow.");
         port_a.Xi_outflow = inStream(port_b.Xi_outflow);
       end if;
     else // no  flow reversal
@@ -212,7 +227,7 @@ equation
   if use_m_flowInv and use_C_flow then
     port_b.C_outflow =  inStream(port_a.C_outflow) + C_flow_internal * m_flowInv;
   else // no trace substance added.
-    assert(not use_C_flow, "Wrong implementation of trace substance balance for forward flow.");
+    assert(not use_C_flow, "In " + getInstanceName() + ": Wrong implementation of trace substance balance for forward flow.");
     port_b.C_outflow =  inStream(port_a.C_outflow);
   end if;
 
@@ -318,19 +333,44 @@ Buildings.Fluid.Interfaces.ConservationEquation</a>.
 revisions="<html>
 <ul>
 <li>
+March 30, 2018, by Filip Jorissen:<br/>
+Added <code>getInstanceName()</code> in asserts to facilitate
+debugging.<br/>
+See <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/901\">#901</a>.
+</li>
+<li>
+April 24, 2017, by Michael Wetter and Filip Jorissen:<br/>
+Reimplemented check for energy conversion.<br/>
+See <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/741\">#741</a>.
+</li>
+<li>
+April 24, 2017, by Michael Wetter:<br/>
+Reverted change from April 21, 2017.<br/>
+See <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/741\">#741</a>.
+</li>
+<li>
+April 21, 2017, by Filip Jorissen:<br/>
+Revised test for energy conservation at small mass flow rates.
+See <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/741\">#741</a>.
+</li>
+<li>
+October 23, 2016, by Filip Jorissen:<br/>
+Added test for energy conservation at small mass flow rates.
+</li>
+<li>
 March 17, 2016, by Michael Wetter:<br/>
 Refactored model and implmented <code>regStep</code> instead of <code>spliceFunction</code>.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/247\">#247</a>
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/247\">#247</a>
 and for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/300\">#300</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/300\">#300</a>.
 </li>
 <li>
 September 3, 2015, by Filip Jorissen:<br/>
 Revised implementation of conservation of vapor mass.
 Added new variable <code>mFlow_inv_b</code>.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/247\">#247</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/247\">#247</a>.
 </li>
 <li>
 January 22, 2016, by Michael Wetter:<br/>
@@ -343,17 +383,17 @@ Buildings.Fluid.MassExchangers.Examples.ConstantEffectiveness</a>.
 </li>
 <li>
 January 20, 2016, by Filip Jorissen:<br/>
-Removed if-else block in code for parameter <code>sensibleOnly</code> 
+Removed if-else block in code for parameter <code>sensibleOnly</code>
 since this is no longer needed to simplify the equations.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/372\">#372</a>.
 </li>
 <li>
 January 17, 2016, by Michael Wetter:<br/>
 Added parameter <code>use_C_flow</code> and converted <code>C_flow</code>
 to a conditionally removed connector.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/372\">#372</a>.
 </li>
 <li>
 December 16, 2015, by Michael Wetter:<br/>
@@ -366,7 +406,7 @@ November 19, 2015, by Michael Wetter:<br/>
 Removed assignment of parameter
 <code>showDesignFlowDirection</code> in <code>extends</code> statement.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/349\">#349</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/349\">#349</a>.
 </li>
 <li>
 September 14, 2015, by Filip Jorissen:<br/>
@@ -380,7 +420,7 @@ Buildings.Utilities.Math.Functions.inverseXRegularized</a>
 to allow function to be inlined and to factor out the computation
 of arguments that only depend on parameters.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/302\">issue 302</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/302\">issue 302</a>.
 </li>
 <li>
 July 17, 2015, by Michael Wetter:<br/>
@@ -389,7 +429,7 @@ allowed.
 The previous formulation was singular.
 This caused some models to not translate.
 The error was introduced in
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/282\">#282</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/282\">#282</a>.
 </li>
 <li>
 July 17, 2015, by Michael Wetter:<br/>
@@ -403,7 +443,7 @@ added default values for outlet quantities at <code>port_a</code>
 if <code>allowFlowReversal=false</code> and
 updated documentation.
 See
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/281\">
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/281\">
 issue 281</a> for a discussion.
 </li>
 <li>
@@ -413,7 +453,7 @@ and do not lead to division by zero,
 also when connecting a <code>prescribedHeatFlowRate</code>
 to <code>MixingVolume</code> instances.
 Renamed <code>use_safeDivision</code> into <code>prescribedHeatFlowRate</code>.
-See <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/282\">#282</a>
+See <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/282\">#282</a>
 for a discussion.
 </li>
 <li>
@@ -468,7 +508,7 @@ December 14, 2011 by Michael Wetter:<br/>
 Changed assignment of <code>hOut</code>, <code>XiOut</code> and
 <code>COut</code> to no longer declare that it is continuous.
 The declaration of continuity, i.e, the
-<code>smooth(0, if (port_a.m_flow >= 0) then ...</code> declaration,
+<code>smooth(0, if (port_a.m_flow >= 0) then ...)</code> declaration,
 was required for Dymola 2012 to simulate, but it is no longer needed
 for Dymola 2012 FD01.
 </li>
@@ -565,7 +605,5 @@ First implementation.
         Line(points={{-56,-73},{81,-73}}, color={255,255,255}),
         Line(points={{6,14},{6,-37}},     color={255,255,255}),
         Line(points={{54,14},{6,14}},     color={255,255,255}),
-        Line(points={{6,-37},{-42,-37}},  color={255,255,255})}),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{
-            100,100}})));
+        Line(points={{6,-37},{-42,-37}},  color={255,255,255})}));
 end StaticTwoPortConservationEquation;

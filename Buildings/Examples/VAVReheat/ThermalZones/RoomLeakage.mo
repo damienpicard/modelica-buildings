@@ -4,21 +4,25 @@ model RoomLeakage "Room leakage model"
   replaceable package Medium = Modelica.Media.Interfaces.PartialMedium
     "Medium in the component" annotation (choicesAllMatching=true);
   parameter Modelica.SIunits.Volume VRoo "Room volume";
-  Buildings.Fluid.FixedResistances.FixedResistanceDpM res(
+  parameter Boolean use_windPressure=false
+    "Set to true to enable wind pressure"
+    annotation(Evaluate=true);
+  Buildings.Fluid.FixedResistances.PressureDrop res(
     redeclare package Medium = Medium,
     dp_nominal=50,
-    m_flow_nominal=VRoo*1.2/3600) "Resistance model" annotation (Placement(
-        transformation(extent={{20,-10},{40,10}})));
+    m_flow_nominal=VRoo*1.2/3600) "Resistance model"
+    annotation (Placement(transformation(extent={{20,-10},{40,10}})));
   Modelica.Fluid.Interfaces.FluidPort_b port_b(redeclare package Medium =
         Medium) annotation (Placement(transformation(extent={{90,-10},{110,10}})));
-  Fluid.Sources.Outside_CpLowRise
+  Buildings.Fluid.Sources.Outside_CpLowRise
                         amb(redeclare package Medium = Medium, nPorts=1,
     s=s,
-    azi=azi)
+    azi=azi,
+    Cp0=if use_windPressure then 0.6 else 0)
     annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
   BoundaryConditions.WeatherData.Bus weaBus "Bus with weather data"
     annotation (Placement(transformation(extent={{-110,-10},{-90,10}})));
-  Fluid.Sensors.MassFlowRate senMasFlo1(redeclare package Medium = Medium,
+  Buildings.Fluid.Sensors.MassFlowRate senMasFlo1(redeclare package Medium = Medium,
       allowFlowReversal=true) "Sensor for mass flow rate" annotation (Placement(
         transformation(
         extent={{10,10},{-10,-10}},
@@ -29,6 +33,7 @@ model RoomLeakage "Room leakage model"
     annotation (Placement(transformation(extent={{12,30},{32,50}})));
   parameter Real s "Side ratio, s=length of this wall/length of adjacent wall";
   parameter Modelica.SIunits.Angle azi "Surface azimuth (South:0, West:pi/2)";
+
 equation
   connect(res.port_b, port_b) annotation (Line(points={{40,6.10623e-16},{55,
           6.10623e-16},{55,1.16573e-15},{70,1.16573e-15},{70,5.55112e-16},{100,

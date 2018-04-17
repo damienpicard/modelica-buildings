@@ -25,7 +25,7 @@ model ClosedDoors "Model with three closed doors"
     massDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal=0.01)
     annotation (Placement(transformation(extent={{40,40},{60,60}})));
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow PrescribedHeatFlow1
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow PrescribedHeatFlow1
     annotation (Placement(transformation(extent={{4,40},{24,60}})));
   Modelica.Blocks.Sources.Sine Sine1(freqHz=1/3600) annotation (Placement(
         transformation(extent={{-68,40},{-48,60}})));
@@ -106,7 +106,7 @@ equation
       points={{-67,-5.55112e-16},{-67,-14},{10,-14}},
       color={0,127,255}));
   annotation (
-experiment(StopTime=7200),
+experiment(Tolerance=1e-006, StopTime=7200),
     __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Airflow/Multizone/Examples/ClosedDoors.mos"
         "Simulate and plot"),
     Documentation(info="<html>

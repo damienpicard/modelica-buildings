@@ -43,6 +43,12 @@ model HeatingCoolingCarnot_T
   Modelica.Blocks.Interfaces.RealOutput QCoo_flow(unit="W")
     "Heat extracted from fluid"
     annotation (Placement(transformation(extent={{100,20},{120,40}})));
+  Modelica.Blocks.Interfaces.RealOutput QAmbHea_flow(unit="W")
+    "Heat from ambient to heat pump evaporator"
+    annotation (Placement(transformation(extent={{100,-50},{120,-30}})));
+  Modelica.Blocks.Interfaces.RealOutput QAmbChi_flow(unit="W")
+    "Heat from chiller condenser to ambient"
+    annotation (Placement(transformation(extent={{100,-70},{120,-50}})));
 protected
   replaceable package MediumSin =
       Buildings.Media.Air "Medium model for the heat sink"
@@ -68,7 +74,7 @@ protected
     Medium.specificHeatCapacityCp(sta_default)
     "Specific heat capacity of the fluid";
 
-  Fluid.Chillers.Carnot_TEva coo(
+  Buildings.Fluid.Chillers.Carnot_TEva coo(
     show_T=true,
     redeclare package Medium1 = MediumSin,
     redeclare package Medium2 = Medium,
@@ -84,10 +90,10 @@ protected
     allowFlowReversal1=false) "Chiller"
     annotation (Placement(transformation(extent={{38,-4},{58,16}})));
 
-  Fluid.HeatPumps.Carnot_TCon hea(
-    show_T=true,
+  Buildings.Fluid.HeatPumps.Carnot_TCon hea(
     redeclare package Medium1 = Medium,
     redeclare package Medium2 = MediumSin,
+    show_T=true,
     m1_flow_nominal=m_flow_nominal,
     QCon_flow_nominal=m_flow_nominal*cp_default*dTCon_nominal,
     dp2_nominal=6000,
@@ -100,20 +106,15 @@ protected
     dp1_nominal=dp_nominal) "Heat pump for heating"
     annotation (Placement(transformation(extent={{-52,-16},{-32,4}})));
 
-  Fluid.Sensors.TemperatureTwoPort senTem(
-    redeclare package Medium = Medium,
-    m_flow_nominal=m_flow_nominal,
-    tau=0) "Temperature sensor"
-    annotation (Placement(transformation(extent={{-6,-6},{6,6}})));
-
-  Fluid.Sources.FixedBoundary sinHea(nPorts=1, redeclare package Medium =
-        MediumSin) "Pressure source" annotation (Placement(transformation(
+  Buildings.Fluid.Sources.FixedBoundary sinHea(
+    redeclare package Medium = MediumSin,
+    nPorts=1) "Pressure source" annotation (Placement(transformation(
           extent={{-10,10},{10,-10}}, origin={-70,-20})));
-  Fluid.Sources.MassFlowSource_T souHea(
+  Buildings.Fluid.Sources.MassFlowSource_T souHea(
+    redeclare package Medium = MediumSin,
     use_m_flow_in=true,
     use_T_in=true,
-    nPorts=1,
-    redeclare package Medium = MediumSin) "Mass flow source"
+    nPorts=1) "Mass flow source"
     annotation (Placement(transformation(extent={{8,-10},{-12,-30}})));
   Modelica.Blocks.Math.Gain mHeaSin_flow(k=1/(cpSin_default*dTSin))
     "Mass flow rate for heat source"
@@ -125,16 +126,17 @@ protected
   Modelica.Blocks.Math.Gain mCooSin_flow(k=-1/(cpSin_default*dTSin))
     "Mass flow rate for heat sink"
     annotation (Placement(transformation(extent={{66,60},{86,80}})));
-  Fluid.Sources.MassFlowSource_T sou2(
+  Buildings.Fluid.Sources.MassFlowSource_T sou2(
+    redeclare package Medium = MediumSin,
     use_m_flow_in=true,
     use_T_in=true,
-    redeclare package Medium = MediumSin,
     nPorts=1) "Mass flow source"
     annotation (Placement(transformation(extent={{-8,10},{12,30}})));
 
-  Fluid.Sources.FixedBoundary sinCoo(          redeclare package Medium =
-        MediumSin, nPorts=1) "Pressure source"
-                                     annotation (Placement(transformation(
+  Buildings.Fluid.Sources.FixedBoundary sinCoo(
+    redeclare package Medium = MediumSin,
+    nPorts=1) "Pressure source"
+    annotation (Placement(transformation(
           extent={{10,-10},{-10,10}}, origin={82,20})));
 
 equation
@@ -142,9 +144,6 @@ equation
           {-120,80}}, color={0,0,127}));
   connect(port_a, hea.port_a1) annotation (Line(points={{-100,0},{-52,0}},
                               color={0,127,255}));
-  connect(hea.port_b1, senTem.port_a)
-    annotation (Line(points={{-32,0},{-32,0},{-20,0},{-6,0}},
-                                                          color={0,127,255}));
   connect(hea.QCon_flow, addHea.u1) annotation (Line(points={{-31,3},{-24,3},{
           -24,-50},{-70,-50},{-70,-64},{-62,-64}}, color={0,0,127}));
   connect(hea.P, addHea.u2) annotation (Line(points={{-31,-6},{-26,-6},{-26,-46},
@@ -174,9 +173,8 @@ equation
   connect(hea.P, PComHea) annotation (Line(points={{-31,-6},{-26,-6},{-26,98},{
           98,98},{98,90},{110,90}},
                                  color={0,0,127}));
-  connect(coo.P, PComCoo) annotation (Line(points={{59,6},{68,6},{68,6},{68,6},
-          {68,54},{98,54},{98,70},{110,70}},
-                             color={0,0,127}));
+  connect(coo.P, PComCoo) annotation (Line(points={{59,6},{68,6},{68,54},{98,54},
+          {98,70},{110,70}}, color={0,0,127}));
   connect(hea.QCon_flow, QHea_flow) annotation (Line(points={{-31,3},{-24,3},{
           -24,50},{94,50},{110,50}},         color={0,0,127}));
   connect(TSetCoo, coo.TSet) annotation (Line(points={{-120,40},{32,40},{32,15},
@@ -188,14 +186,18 @@ equation
           {62,6},{62,20},{72,20}}, color={0,127,255}));
   connect(port_b, coo.port_a2) annotation (Line(points={{100,0},{86,0},{72,0},{
           58,0}},          color={0,127,255}));
-  connect(coo.port_b2, senTem.port_b) annotation (Line(points={{38,0},{20,0},{6,
-          0}},           color={0,127,255}));
-  connect(addCoo.u1, coo.QEva_flow) annotation (Line(points={{38,76},{28,76},{
-          28,-14},{70,-14},{70,-3},{59,-3}}, color={0,0,127}));
+  connect(addCoo.u1, coo.QEva_flow) annotation (Line(points={{38,76},{28,76},{28,
+          -14},{64,-14},{64,-8},{64,-3},{60,-3},{59,-3}},
+                                             color={0,0,127}));
   connect(coo.QEva_flow, QCoo_flow) annotation (Line(points={{59,-3},{94,-3},{
           94,30},{110,30}}, color={0,0,127}));
-  annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-            -100},{100,100}})), Icon(coordinateSystem(preserveAspectRatio=false,
+  connect(hea.port_b1, coo.port_b2)
+    annotation (Line(points={{-32,0},{38,0}},        color={0,127,255}));
+  connect(hea.QEva_flow, QAmbHea_flow) annotation (Line(points={{-31,-15},{-28,-15},
+          {-28,-40},{110,-40}}, color={0,0,127}));
+  connect(coo.QCon_flow, QAmbChi_flow) annotation (Line(points={{59,15},{66,15},
+          {66,-60},{110,-60}}, color={0,0,127}));
+  annotation ( Icon(coordinateSystem(preserveAspectRatio=false,
           extent={{-100,-100},{100,100}}), graphics={
                                 Rectangle(
         extent={{-100,-100},{100,100}},
@@ -275,6 +277,26 @@ Carnot cycle analogy.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+August 8, 2016, by Michael Wetter:<br/>
+Changed default temperature to compute COP to be the leaving temperature as
+use of the entering temperature can violate the 2nd law if the temperature
+lift is small.<br/>
+This is for
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/497\">
+Annex 60, issue 497</a>.
+</li>
+<li>
+July 8, 2016, by Michael Wetter:<br/>
+Added output signal for heat exchanged with ambient.
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/541\">
+issue 541</a>.
+</li>
+<li>
+June 26, 2016, by Michael Wetter:<br/>
+Removed temperature sensor which is no longer needed.
+</li>
 <li>
 January 11, 2016, by Michael Wetter:<br/>
 First implementation.

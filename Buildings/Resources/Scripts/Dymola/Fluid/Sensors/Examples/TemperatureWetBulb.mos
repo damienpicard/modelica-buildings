@@ -1,4 +1,4 @@
-simulateModel("Buildings.Fluid.Sensors.Examples.TemperatureWetBulb", method="dassl", stopTime=120, resultFile="TemperatureWetBulb");
+simulateModel("Buildings.Fluid.Sensors.Examples.TemperatureWetBulb", method="dassl", tolerance=1e-6, stopTime=120, resultFile="TemperatureWetBulb");
 createPlot(id = 5,
  position = {84, 37, 677, 498},
  y = {"senWetBul.T"},
@@ -31,7 +31,7 @@ createPlot(id = 5,
  colors = {{0,0,255}});
 createPlot(id = 5,
  position = {84, 37, 677, 162},
- y = {"sou.X_in[1]"},
+ y = {"sou.Xi_in[1]"},
  range = {0.0, 120.0, 0.012, 0.02},
  autoscale = true,
  autoerase = true,

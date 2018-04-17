@@ -5,7 +5,7 @@ model System1
   replaceable package MediumA =
       Buildings.Media.Air;
 
-  Fluid.MixingVolumes.MixingVolume vol(
+  Buildings.Fluid.MixingVolumes.MixingVolume vol(
     redeclare package Medium = MediumA,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal=mA_flow_nominal,
@@ -15,7 +15,7 @@ model System1
     "Thermal conductance with the ambient"
     annotation (Placement(transformation(extent={{20,40},{40,60}})));
   parameter Modelica.SIunits.Volume V=6*10*3 "Room volume";
-  parameter Modelica.SIunits.MassFlowRate mA_flow_nominal = V*6/3600
+  parameter Modelica.SIunits.MassFlowRate mA_flow_nominal = V*1.2*6/3600
     "Nominal mass flow rate";
   parameter Modelica.SIunits.HeatFlowRate QRooInt_flow = 4000
     "Internal heat gains of the room";
@@ -31,9 +31,10 @@ model System1
   Modelica.Blocks.Sources.CombiTimeTable timTab(
       extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
       smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-      table=[-6*3600, 0;
-              8*3600, QRooInt_flow;
-             18*3600, 0]) "Time table for internal heat gain"
+      table=[-6, 0;
+              8, QRooInt_flow;
+             18, 0],
+      timeScale=3600) "Time table for internal heat gain"
     annotation (Placement(transformation(extent={{-20,70},{0,90}})));
 equation
   connect(TOut.port, theCon.port_a) annotation (Line(
@@ -88,25 +89,14 @@ In this example, there is only one model with air.
 <p>
 We called the medium <code>MediumA</code> to distinguish it from
 <code>MediumW</code> that we will use in later versions of the model for components that
-have water as a medium. Because we do not anticipate saturated air, we used
-the medium model
-<a href=\"modelica://Buildings.Media.Air\">
-Buildings.Media.Air</a>
-instead of
-<a href=\"modelica://Buildings.Media.GasesPTDecoupled.MoistAir\">
-Buildings.Media.GasesPTDecoupled.MoistAir</a>
-as the latter is computationally more expensive.
-Because in this model, we are not interested in air humidification or
-dehumidification, we could have as well used the medium model
-<a href=\"modelica://Buildings.Media.GasesPTDecoupled.SimpleAir\">
-Buildings.Media.GasesPTDecoupled.SimpleAir</a>.
+have water as a medium.
 </p>
 <p>
 We also defined the system-level parameters
 </p>
 <pre>
   parameter Modelica.SIunits.Volume V=6*10*3 \"Room volume\";
-  parameter Modelica.SIunits.MassFlowRate mA_flow_nominal = V*6/3600
+  parameter Modelica.SIunits.MassFlowRate mA_flow_nominal = V*1.2*6/3600
     \"Nominal mass flow rate\";
   parameter Modelica.SIunits.HeatFlowRate QRooInt_flow = 4000
     \"Internal heat gains of the room\";
@@ -188,16 +178,17 @@ We set the table parameters to
   Modelica.Blocks.Sources.CombiTimeTable timTab(
       extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
       smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-      table=[-6*3600, 0;
-              8*3600, QRooInt_flow;
-             18*3600, 0]) \"Time table for internal heat gain\";
+      table=[-6, 0;
+              8, QRooInt_flow;
+             18, 0],
+      timeScale=3600) \"Time table for internal heat gain\";
 </pre>
 <p>
 Note that we set the output to be a periodic signal by configuring
 <code>
 extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic.
 </code>
-The first time stamp is <i>-6*3600</i> seconds in order to create
+The first time stamp is <i>-6</i> hours in order to create
 a table that has a periodicity of one day.
 We also set the interpolation of the data to using
 piece-wise constant segments.
@@ -266,8 +257,8 @@ that the required heat flow rate to keep the temperature at
 <h4>Notes</h4>
 <p>
 For a more realistic model of a room, the model
-<a href=\"modelica://Buildings.Rooms.MixedAir\">
-Buildings.Rooms.MixedAir</a>
+<a href=\"modelica://Buildings.ThermalZones.Detailed.MixedAir\">
+Buildings.ThermalZones.Detailed.MixedAir</a>
 could have been used.
 For transient heat conduction, models from the
 package
@@ -277,6 +268,11 @@ could have been used.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+March 6, 2017, by Michael Wetter:<br/>
+Added missing density to computation of air mass flow rate.<br/>
+This is for <a href=\"https://github.com/lbl-srg/modelica-buildings/issues/673\">#673</a>.
+</li>
 <li>
 December 22, 2014 by Michael Wetter:<br/>
 Removed <code>Modelica.Fluid.System</code>
@@ -292,5 +288,5 @@ First implementation.
     __Dymola_Commands(file=
      "modelica://Buildings/Resources/Scripts/Dymola/Examples/Tutorial/Boiler/System1.mos"
         "Simulate and plot"),
-    experiment(StopTime=172800));
+    experiment(Tolerance=1e-6, StopTime=172800));
 end System1;

@@ -25,7 +25,7 @@ partial model DataCenter
     m_flow_nominal=mAir_flow_nominal,
     dp(start=249),
     m_flow(start=mAir_flow_nominal),
-    filteredSpeed=false,
+    use_inputFilter=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
     T_start=293.15) "Fan for air flow through the data center"
     annotation (Placement(transformation(extent={{348,-235},{328,-215}})));
@@ -36,12 +36,12 @@ partial model DataCenter
     m1_flow_nominal=mCHW_flow_nominal,
     m1_flow(start=mCHW_flow_nominal),
     m2_flow(start=mAir_flow_nominal),
-    dp1_nominal(displayUnit="Pa") = 1000,
     dp2_nominal=249*3,
     UA_nominal=mAir_flow_nominal*1006*5,
-    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyStateInitial)
+    energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyStateInitial,
+    dp1_nominal(displayUnit="Pa") = 1000 + 89580)
     "Cooling coil"
-    annotation (Placement(transformation(extent={{298,-185},{278,-165}})));
+    annotation (Placement(transformation(extent={{300,-180},{280,-160}})));
   Modelica.Blocks.Sources.Constant mFanFlo(k=mAir_flow_nominal)
     "Mass flow rate of fan" annotation (Placement(transformation(extent={{298,
             -210},{318,-190}})));
@@ -53,17 +53,16 @@ partial model DataCenter
     rooHei=3,
     m_flow_nominal=mAir_flow_nominal,
     QRoo_flow=500000) "Room model" annotation (Placement(transformation(
-        extent={{-10,-10},{10,10}},
+        extent={{-10,10},{10,-10}},
         origin={248,-238})));
-  Fluid.Movers.FlowControlled_dp pumCHW(
+  Buildings.Fluid.Movers.FlowControlled_dp pumCHW(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCHW_flow_nominal,
     m_flow(start=mCHW_flow_nominal),
     dp(start=325474),
-    filteredSpeed=false,
+    use_inputFilter=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial)
-    "Chilled water pump"                      annotation (Placement(
-        transformation(
+    "Chilled water pump" annotation (Placement(transformation(
         extent={{10,10},{-10,-10}},
         rotation=270,
         origin={218,-120})));
@@ -86,10 +85,9 @@ partial model DataCenter
     redeclare package Medium = MediumW,
     m_flow_nominal=mCW_flow_nominal,
     dp(start=214992),
-    filteredSpeed=false,
+    use_inputFilter=false,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial)
-    "Condenser water pump"                      annotation (Placement(
-        transformation(
+    "Condenser water pump" annotation (Placement(transformation(
         extent={{-10,10},{10,-10}},
         rotation=270,
         origin={358,200})));
@@ -102,22 +100,22 @@ partial model DataCenter
     dp2_nominal=0,
     dp1_nominal=0) "Water side economizer (Heat exchanger)"
     annotation (Placement(transformation(extent={{126,83},{106,103}})));
-  Fluid.Actuators.Valves.TwoWayLinear val5(
+  Buildings.Fluid.Actuators.Valves.TwoWayLinear val5(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCW_flow_nominal,
     dpValve_nominal=20902,
     dpFixed_nominal=89580,
     y_start=1,
-    filteredOpening=false) "Control valve for condenser water loop of chiller"
+    use_inputFilter=false) "Control valve for condenser water loop of chiller"
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={218,180})));
-  Fluid.Actuators.Valves.TwoWayLinear val1(
+  Buildings.Fluid.Actuators.Valves.TwoWayLinear val1(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCHW_flow_nominal,
     dpValve_nominal=20902,
-    filteredOpening=false)
+    use_inputFilter=false)
     "Bypass control valve for economizer. 1: disable economizer, 0: enable economoizer"
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
@@ -134,7 +132,7 @@ partial model DataCenter
     "Cooling tower approach" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         origin={-212,-20})));
-  Fluid.Chillers.ElectricEIR chi(
+  Buildings.Fluid.Chillers.ElectricEIR chi(
     redeclare package Medium1 = MediumW,
     redeclare package Medium2 = MediumW,
     m1_flow_nominal=mCW_flow_nominal,
@@ -144,13 +142,14 @@ partial model DataCenter
     per=Buildings.Fluid.Chillers.Data.ElectricEIR.ElectricEIRChiller_Carrier_19XR_742kW_5_42COP_VSD(),
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyStateInitial)
     annotation (Placement(transformation(extent={{274,83},{254,103}})));
-  Fluid.Actuators.Valves.TwoWayLinear val6(
+  Buildings.Fluid.Actuators.Valves.TwoWayLinear val6(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCHW_flow_nominal,
     dpValve_nominal=20902,
     dpFixed_nominal=14930 + 89580,
     y_start=1,
-    filteredOpening=false)
+    use_inputFilter=false,
+    from_dp=true)
     "Control valve for chilled water leaving from chiller" annotation (
       Placement(transformation(
         extent={{-10,10},{10,-10}},
@@ -176,13 +175,13 @@ partial model DataCenter
         origin={-230,170})));
   Modelica.Blocks.Math.BooleanToReal chiCon "Contorl signal for chiller"
     annotation (Placement(transformation(extent={{-160,40},{-140,60}})));
-  Fluid.Actuators.Valves.TwoWayLinear val4(
+  Buildings.Fluid.Actuators.Valves.TwoWayLinear val4(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCW_flow_nominal,
     dpValve_nominal=20902,
     dpFixed_nominal=59720,
     y_start=0,
-    filteredOpening=false)
+    use_inputFilter=false)
     "Control valve for condenser water loop of economizer" annotation (
       Placement(transformation(
         extent={{-10,-10},{10,10}},
@@ -211,28 +210,26 @@ partial model DataCenter
     "Control singal for cooling tower fan" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         origin={230,271})));
-  Fluid.Actuators.Valves.TwoWayEqualPercentage valByp(
+  Buildings.Fluid.Actuators.Valves.TwoWayEqualPercentage valByp(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCHW_flow_nominal,
     dpValve_nominal=20902,
     dpFixed_nominal=14930,
     y_start=0,
-    filteredOpening=false) "Bypass valve for chiller."
-    annotation (Placement(transformation(
-        extent={{-10,-10},{10,10}},
-        origin={288,20})));
+    use_inputFilter=false,
+    from_dp=true)          "Bypass valve for chiller." annotation (Placement(
+        transformation(extent={{-10,-10},{10,10}}, origin={288,20})));
   Buildings.Examples.ChillerPlant.BaseClasses.Controls.KMinusU KMinusU(k=1)
     annotation (Placement(transformation(extent={{-60,28},{-40,48}})));
-  Fluid.Actuators.Valves.TwoWayLinear val3(
+  Buildings.Fluid.Actuators.Valves.TwoWayLinear val3(
     redeclare package Medium = MediumW,
     m_flow_nominal=mCHW_flow_nominal,
     dpValve_nominal=20902,
     dpFixed_nominal=59720 + 1000,
-    filteredOpening=false)
+    use_inputFilter=false)
     "Control valve for economizer. 0: disable economizer, 1: enable economoizer"
-    annotation (Placement(transformation(
-        extent={{10,-10},{-10,10}},
-        origin={118,-60})));
+    annotation (Placement(transformation(extent={{10,-10},{-10,10}}, origin={
+            118,-60})));
   Buildings.Fluid.Sensors.TemperatureTwoPort TCHWLeaCoi(redeclare package
       Medium = MediumW, m_flow_nominal=mCHW_flow_nominal)
     "Temperature of chilled water leaving the cooling coil"
@@ -242,15 +239,10 @@ partial model DataCenter
         rotation=270,
         origin={218,-80})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaData(filNam=
-        "modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos")
+        Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos"))
     annotation (Placement(transformation(extent={{-360,-100},{-340,-80}})));
   BoundaryConditions.WeatherData.Bus weaBus
     annotation (Placement(transformation(extent={{-332,-98},{-312,-78}})));
-  Fluid.FixedResistances.FixedResistanceDpM res(
-    redeclare package Medium = MediumW,
-    m_flow_nominal=mCHW_flow_nominal,
-    dp_nominal=89580)
-    annotation (Placement(transformation(extent={{328,-170},{348,-150}})));
   Modelica.Blocks.Math.Gain gain(k=20*6485)
     annotation (Placement(transformation(extent={{-60,90},{-40,110}})));
   Modelica.Blocks.Math.Feedback feedback
@@ -260,7 +252,7 @@ partial model DataCenter
   Modelica.Blocks.Logical.Or or1
     annotation (Placement(transformation(extent={{20,190},{40,210}})));
   Modelica.Blocks.Math.BooleanToReal mCWFlo(realTrue=mCW_flow_nominal)
-    "Mass flow rate of condensor loop"
+    "Mass flow rate of condenser loop"
     annotation (Placement(transformation(extent={{60,190},{80,210}})));
   Modelica.Blocks.Sources.RealExpression PHVAC(y=fan.P + pumCHW.P + pumCW.P +
         cooTow.PFan + chi.P) "Power consumed by HVAC system"
@@ -279,12 +271,12 @@ partial model DataCenter
     annotation (Placement(transformation(extent={{-240,-290},{-220,-270}})));
 equation
   connect(expVesCHW.port_a, cooCoi.port_b1) annotation (Line(
-      points={{258,-147},{258,-169},{278,-169}},
+      points={{258,-147},{258,-164},{280,-164}},
       color={0,127,255},
       smooth=Smooth.None,
       thickness=0.5));
   connect(expTowTApp.y, wseCon.towTApp) annotation (Line(
-      points={{-201,-20},{-178,-20},{-178,-32.75},{-162,-32.75}},
+      points={{-201,-20},{-178,-20},{-178,-31.9412},{-162,-31.9412}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
@@ -341,12 +333,12 @@ equation
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
   connect(cooCoi.port_b2, fan.port_a) annotation (Line(
-      points={{298,-181},{359,-181},{359,-225},{348,-225}},
+      points={{300,-176},{359,-176},{359,-225},{348,-225}},
       color={0,127,255},
       smooth=Smooth.None,
       thickness=0.5));
   connect(mFanFlo.y, fan.m_flow_in) annotation (Line(
-      points={{319,-200},{338.2,-200},{338.2,-213}},
+      points={{319,-200},{338,-200},{338,-213}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
@@ -357,17 +349,17 @@ equation
       smooth=Smooth.None,
       thickness=0.5));
   connect(wseCon.y2, val1.y) annotation (Line(
-      points={{-139,-34},{134,-34},{134,-40},{206,-40}},
+      points={{-139,-31.9412},{134,-31.9412},{134,-40},{206,-40}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
   connect(wseCon.y1, val3.y) annotation (Line(
-      points={{-139,-24},{58,-24},{58,-40},{118,-40},{118,-48}},
+      points={{-139,-27.2353},{58,-27.2353},{58,-40},{118,-40},{118,-48}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
   connect(wseCon.y1, val4.y) annotation (Line(
-      points={{-139,-24},{-20,-24},{-20,180},{86,180}},
+      points={{-139,-27.2353},{-20,-27.2353},{-20,180},{86,180}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
@@ -377,12 +369,12 @@ equation
       smooth=Smooth.None,
       thickness=0.5));
   connect(roo.airPorts[1],TAirSup. port_b) annotation (Line(
-      points={{249.85,-228},{249.85,-225},{278,-225}},
+      points={{250.475,-229.3},{250.475,-225},{278,-225}},
       color={0,127,255},
       smooth=Smooth.None,
       thickness=0.5));
   connect(roo.airPorts[2], cooCoi.port_a2) annotation (Line(
-      points={{246.15,-228},{246.15,-225},{218,-225},{218,-181},{278,-181}},
+      points={{246.425,-229.3},{246.425,-225},{218,-225},{218,-176},{280,-176}},
       color={0,127,255},
       smooth=Smooth.None,
       thickness=0.5));
@@ -436,14 +428,14 @@ equation
       pattern=LinePattern.Dash));
   connect(wseCon.wseCWST, TCWLeaTow.T)
                                       annotation (Line(
-      points={{-162,-37.625},{-300,-37.625},{-300,290},{380,290},{380,137},{330,
-          137},{330,130}},
+      points={{-162,-36.5294},{-300,-36.5294},{-300,290},{380,290},{380,137},{
+          330,137},{330,130}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
   connect(wseCon.wseCHWST, TCHWLeaCoi.T)
                                         annotation (Line(
-      points={{-162,-22.75},{-176,-22.75},{-176,-80},{207,-80}},
+      points={{-162,-22.5294},{-176,-22.5294},{-176,-80},{207,-80}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
@@ -456,7 +448,7 @@ equation
       index=1,
       extent={{6,3},{6,3}}));
   connect(wseCon.TWetBul, weaBus.TWetBul) annotation (Line(
-      points={{-162,-29},{-322,-29},{-322,-88}},
+      points={{-162,-28.4118},{-322,-28.4118},{-322,-88}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash), Text(
@@ -506,11 +498,6 @@ equation
       smooth=Smooth.None,
       thickness=0.5));
 
-  connect(cooCoi.port_a1, res.port_a) annotation (Line(
-      points={{298,-169},{318,-169},{318,-160},{328,-160}},
-      color={0,127,255},
-      smooth=Smooth.None,
-      thickness=0.5));
   connect(chiCon.y, KMinusU.u) annotation (Line(
       points={{-139,50},{-80,50},{-80,38},{-61.8,38}},
       color={0,0,127},
@@ -533,7 +520,7 @@ equation
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
   connect(gain.y, pumCHW.dp_in) annotation (Line(
-      points={{-39,100},{20,100},{20,-120.2},{206,-120.2}},
+      points={{-39,100},{20,100},{20,-120},{206,-120}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
@@ -553,17 +540,13 @@ equation
       color={0,127,255},
       smooth=Smooth.None,
       thickness=0.5));
-  connect(res.port_b, val6.port_b) annotation (Line(
-      points={{348,-160},{358,-160},{358,30}},
-      color={0,127,255},
-      smooth=Smooth.None));
   connect(pumCHW.port_a, cooCoi.port_b1) annotation (Line(
-      points={{218,-130},{218,-160},{258,-160},{258,-169},{278,-169}},
+      points={{218,-130},{218,-164},{280,-164}},
       color={0,127,255},
       smooth=Smooth.None,
       thickness=0.5));
   connect(greaterThreshold.u, wseCon.y1) annotation (Line(
-      points={{-12,200},{-20,200},{-20,-24},{-139,-24}},
+      points={{-12,200},{-20,200},{-20,-27.2353},{-139,-27.2353}},
       color={0,0,127},
       smooth=Smooth.None,
       pattern=LinePattern.Dash));
@@ -584,7 +567,7 @@ equation
       pattern=LinePattern.Dash,
       smooth=Smooth.None));
   connect(mCWFlo.y, pumCW.m_flow_in) annotation (Line(
-      points={{81,200},{218,200},{218,200.2},{346,200.2}},
+      points={{81,200},{218,200},{218,200},{346,200}},
       color={0,0,127},
       pattern=LinePattern.Dash,
       smooth=Smooth.None));
@@ -596,28 +579,40 @@ equation
       points={{-279,-280},{-242,-280}},
       color={0,0,127},
       smooth=Smooth.None));
+  connect(cooCoi.port_a1, val6.port_b) annotation (Line(
+      points={{300,-164},{358,-164},{358,30}},
+      color={0,127,255},
+      thickness=0.5));
   annotation (
     Diagram(coordinateSystem(preserveAspectRatio=false,extent={{-400,-300},{400,
-            300}}), graphics),
+            300}})),
 Documentation(info="<HTML>
 <p>
 This model is the chilled water plant with discrete time control and
-trim and response logic for a data center. The model is described at
+trim and respond logic for a data center. The model is described at
 <a href=\"Buildings.Examples.ChillerPlant\">
 Buildings.Examples.ChillerPlant</a>.
 </p>
 </html>", revisions="<html>
 <ul>
 <li>
+September 21, 2017, by Michael Wetter:<br/>
+Set <code>from_dp = true</code> in <code>val6</code> and in <code>valByp</code>
+which is needed for Dymola 2018FD01 beta 2 for
+<a href=\"modelica://Buildings.Examples.ChillerPlant.DataCenterDiscreteTimeControl\">
+Buildings.Examples.ChillerPlant.DataCenterDiscreteTimeControl</a>
+to converge.
+</li>
+<li>
 January 22, 2016, by Michael Wetter:<br/>
 Corrected type declaration of pressure difference.
 This is
-for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/404\">#404</a>.
 </li>
 <li>
 January 13, 2015 by Michael Wetter:<br/>
 Moved model to <code>BaseClasses</code> because the continuous and discrete time
-implementation of the trim and response logic do not extend from a common class,
+implementation of the trim and respond logic do not extend from a common class,
 and hence the <code>constrainedby</code> operator is not applicable.
 Moving the model here allows to implement both controllers without using a
 <code>replaceable</code> class.

@@ -4,10 +4,30 @@ model WetCoilDiscretized
   // When replacing the volume, the Medium is constrained so that the enthalpyOfLiquid
   // function is known. Otherwise, checkModel(...) will fail
   extends DryCoilDiscretized(
+    redeclare replaceable package Medium2 =
+        Modelica.Media.Interfaces.PartialCondensingGases,
     each hexReg(redeclare final
         Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent ele[nPipPar, nPipSeg]),
     temSen_1(m_flow_nominal=m1_flow_nominal),
     temSen_2(m_flow_nominal=m2_flow_nominal));
+
+  Modelica.SIunits.HeatFlowRate QSen2_flow = Q2_flow - QLat2_flow
+    "Sensible heat input into air stream (negative if air is cooled)";
+
+  Modelica.SIunits.HeatFlowRate QLat2_flow=
+    Buildings.Utilities.Psychrometrics.Constants.h_fg * mWat_flow
+    "Latent heat input into air (negative if air is dehumidified)";
+
+  Real SHR(
+    min=0,
+    max=1,
+    unit="1") = QSen2_flow /
+      noEvent(if (Q2_flow > 1E-6 or Q2_flow < -1E-6) then Q2_flow else 1)
+       "Sensible to total heat ratio";
+
+   Modelica.SIunits.MassFlowRate mWat_flow = sum(hexReg[:].ele[:,:].vol2.mWat_flow)
+     "Water flow rate";
+
  annotation (
 defaultComponentName="cooCoi",
     Documentation(info="<html>
@@ -37,6 +57,31 @@ Modelica.Media.Air.MoistAir</a>.
 </html>", revisions="<html>
 <ul>
 <li>
+April 14, 2017, by David Blum:<br/>
+Added heat of condensation to coil surface heat balance
+and removed it from the air stream.
+This gives higher coil surface temperature and avoids
+overestimating the latent heat ratio that was
+observed in the previous implementation.
+The code change was in
+<a href=\"modelica://Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent\">
+Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent</a>.<br/>
+This is for <a href=\"https://github.com/lbl-srg/modelica-buildings/issues/711\">#711</a>.
+</li>
+<li>
+April 12, 2017, by Michael Wetter:<br/>
+Added new variables <code>QSen2_flow</code>, <code>QLat2_flow</code> and <code>SHR</code>.
+</li>
+<li>
+July 29, 2016, by Michael Wetter:<br/>
+Redeclared <code>Medium2</code> to be <code>Modelica.Media.Interfaces.PartialCondensingGases</code>
+because it is used in <code>vol2</code>, which requires the medium to extend
+from this subclass.<br/>
+See also
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/547\">
+issue 547</a>.
+</li>
+<li>
 June 29, 2014, by Michael Wetter:<br/>
 Removed parameter <code>dl</code> which is no longer needed.
 </li>
@@ -50,7 +95,7 @@ in the base class
 <a href=\"modelica://Buildings.Fluid.HeatExchangers.DryCoilDiscretized\">
 Buildings.Fluid.HeatExchangers.DryCoilDiscretized</a>.
 This closes issue
-<a href=\"modelica://https://github.com/lbl-srg/modelica-buildings/issues/194\">
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/194\">
 https://github.com/lbl-srg/modelica-buildings/issues/194</a>,
 which caused the last register to have no liquid flow.
 </li>

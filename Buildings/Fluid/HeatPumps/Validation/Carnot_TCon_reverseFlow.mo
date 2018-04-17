@@ -93,16 +93,16 @@ equation
   connect(heaPum.port_b1,sin1. ports[1]) annotation (Line(points={{10,6},{34,6},
           {34,32},{54,32}}, color={0,127,255}));
   connect(mEva_flow.y, sou2.m_flow_in) annotation (Line(points={{55,-78},{74,
-          -78},{74,-10},{74,4},{52,4}}, color={0,0,127}));
+          -78},{74,-10},{74,4},{54,4}}, color={0,0,127}));
   connect(TConLvg.y, heaPum.TSet) annotation (Line(points={{-29,40},{-20,40},{
           -20,9},{-12,9}}, color={0,0,127}));
   connect(mCon_flow.y, sou1.m_flow_in) annotation (Line(points={{-69,10},{-60,
-          10},{-60,14},{-52,14}}, color={0,0,127}));
+          10},{-60,14},{-54,14}}, color={0,0,127}));
   connect(heaPum.QCon_flow, QEva_flow.u1) annotation (Line(points={{11,9},{20,9},
           {20,-32},{30,-32}}, color={0,0,127}));
   connect(QEva_flow.u2, heaPum.P) annotation (Line(points={{30,-44},{16,-44},{
           16,0},{11,0}}, color={0,0,127}));
-  annotation (experiment(StopTime=3600),
+  annotation (experiment(Tolerance=1e-6, StopTime=3600),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/HeatPumps/Validation/Carnot_TCon_reverseFlow.mos"
         "Simulate and plot"),
     Documentation(
@@ -125,7 +125,5 @@ November 25, 2015, by Michael Wetter:<br/>
 First implementation.
 </li>
 </ul>
-</html>"),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{
-            100,100}})));
+</html>"));
 end Carnot_TCon_reverseFlow;

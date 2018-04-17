@@ -2,7 +2,7 @@ within Buildings.HeatTransfer.Windows.BaseClasses;
 block Overhang
   "For a window with an overhang, outputs the fraction of the area that is sun exposed"
   extends Modelica.Blocks.Icons.Block;
-  extends Buildings.Rooms.BaseClasses.Overhang;
+  extends Buildings.ThermalZones.Detailed.BaseClasses.Overhang;
 
   Modelica.Blocks.Interfaces.RealInput verAzi(
     quantity="Angle",
@@ -70,14 +70,14 @@ protected
     "Solar azimuth"
     annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
 
-initial algorithm
+initial equation
   assert(wL >= 0,  "Overhang must cover complete window
     Received overhang width on left hand side, wL = " + String(wL));
   assert(wR >= 0,  "Overhang must cover complete window
     Received overhang width on right hand side, wR = " + String(wR));
 
   for i in 1:4 loop
-    tmpH[i] := gap + mod((i - 1), 2)*hWin;
+    tmpH[i] = gap + mod((i - 1), 2)*hWin;
   end for;
 
 equation

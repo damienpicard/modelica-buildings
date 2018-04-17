@@ -60,9 +60,9 @@ equation
       smooth=Smooth.None));
   annotation (              experiment(
       StopTime=3600,
-      Tolerance=1e-05),
+      Tolerance=1e-6),
             __Dymola_Commands(file=
-          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesBalanced/Storage/Examples/ACOnePhaseBattery.mos"
+          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesBalanced/Storage/Examples/AcBattery.mos"
         "Simulate and plot"),
           Documentation(revisions="<html>
 <ul>

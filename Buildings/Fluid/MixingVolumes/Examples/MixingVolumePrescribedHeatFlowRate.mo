@@ -40,7 +40,7 @@ model MixingVolumePrescribedHeatFlowRate
     annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
   Modelica.Blocks.Sources.Constant const(k=0)
     annotation (Placement(transformation(extent={{-80,20},{-60,40}})));
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
     "Prescribed heat flow rate"
     annotation (Placement(transformation(extent={{-40,20},{-20,40}})));
 equation
@@ -83,7 +83,7 @@ First implementation.
 </li>
 </ul>
 </html>"),
-experiment(StopTime=1.0),
+experiment(Tolerance=1E-6, StopTime=1.0),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/MixingVolumes/Examples/MixingVolumePrescribedHeatFlowRate.mos"
         "Simulate and plot"));
 end MixingVolumePrescribedHeatFlowRate;

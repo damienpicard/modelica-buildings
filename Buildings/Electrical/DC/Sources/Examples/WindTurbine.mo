@@ -12,7 +12,7 @@ model WindTurbine "Example for the WindTurbine model"
         extent={{-10,-10},{10,10}},
         origin={50,40})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
-      computeWetBulbTemperature=false, filNam="modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos")
+      computeWetBulbTemperature=false, filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos"))
     annotation (Placement(transformation(extent={{-62,76},{-42,96}})));
   Buildings.BoundaryConditions.WeatherData.Bus weaBus
     annotation (Placement(transformation(extent={{6,76},{26,96}})));
@@ -61,7 +61,7 @@ equation
       smooth=Smooth.None));
   annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-140,
             -100},{100,140}}),      graphics),
-    experiment(StopTime=172800, Tolerance=1e-05),
+    experiment(StopTime=172800, Tolerance=1e-6),
 Documentation(info="<html>
 <p>
 This model illustrates the use of the wind turbine model which is connected to a DC voltage source and a resistance.

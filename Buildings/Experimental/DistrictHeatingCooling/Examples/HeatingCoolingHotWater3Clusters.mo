@@ -46,7 +46,6 @@ model HeatingCoolingHotWater3Clusters
       nPorts=1) "Model to set the reference pressure"
                                           annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
-        rotation=0,
         origin={-562,110})));
   Buildings.Fluid.FixedResistances.Pipe pip(
     redeclare package Medium = Medium,
@@ -103,7 +102,7 @@ model HeatingCoolingHotWater3Clusters
     m_flow_nominal=m_flow_nominal/3)
     annotation (Placement(transformation(extent={{160,-210},{140,-190}})));
 
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup1(
+  Buildings.Fluid.FixedResistances.Junction splSup1(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -111,7 +110,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-330,130},{-310,150}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet1(
+  Buildings.Fluid.FixedResistances.Junction splRet1(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -119,7 +118,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-250,30},{-230,10}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup2(
+  Buildings.Fluid.FixedResistances.Junction splSup2(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -127,7 +126,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-210,130},{-190,150}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet2(
+  Buildings.Fluid.FixedResistances.Junction splRet2(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -135,7 +134,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-130,30},{-110,10}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup3(
+  Buildings.Fluid.FixedResistances.Junction splSup3(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -143,7 +142,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-90,130},{-70,150}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet3(
+  Buildings.Fluid.FixedResistances.Junction splRet3(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -151,7 +150,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-10,30},{10,10}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup5(
+  Buildings.Fluid.FixedResistances.Junction splSup5(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -159,7 +158,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{190,130},{210,150}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet5(
+  Buildings.Fluid.FixedResistances.Junction splRet5(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -167,7 +166,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{270,30},{290,10}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup6(
+  Buildings.Fluid.FixedResistances.Junction splSup6(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -175,7 +174,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{330,130},{350,150}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet6(
+  Buildings.Fluid.FixedResistances.Junction splRet6(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -183,7 +182,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{410,30},{430,10}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup4(
+  Buildings.Fluid.FixedResistances.Junction splSup4(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -191,7 +190,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{50,130},{70,150}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet4(
+  Buildings.Fluid.FixedResistances.Junction splRet4(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -199,7 +198,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{90,10},{110,30}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup7(
+  Buildings.Fluid.FixedResistances.Junction splSup7(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -207,7 +206,7 @@ model HeatingCoolingHotWater3Clusters
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{180,-90},{200,-70}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet7(
+  Buildings.Fluid.FixedResistances.Junction splRet7(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -230,7 +229,7 @@ public
     tableName="tab1",
     extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
     smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
-    y(unit="K"),
+    y(each unit="K"),
     fileName=Buildings.BoundaryConditions.WeatherData.BaseClasses.getAbsolutePath(
       "modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/Plants/AlamedaOceanT.mos"))
     "Temperature of the water reservoir (such as a river, lake or ocean)"
@@ -348,7 +347,7 @@ equation
   connect(bayWatHex.TSouCoo, weaBus.TDryBul) annotation (Line(points={{-402,
           49.5},{-410,49.5},{-410,50},{-410,50},{-410,160},{-340,160},{-340,190}},
         color={0,0,127}));
-  annotation(experiment(Tolerance=1E-6, StopTime=31536000),
+  annotation(experiment(Tolerance=1E-06, StopTime=31536000),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Experimental/DistrictHeatingCooling/Examples/HeatingCoolingHotWater3Clusters.mos"
         "Simulate and plot"),
     Documentation(
@@ -368,6 +367,5 @@ First implementation.
 </ul>
 </html>"),
     Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-580,-260},{780,
-            400}})),
-    Icon(coordinateSystem(extent={{-100,-100},{100,100}})));
+            400}})));
 end HeatingCoolingHotWater3Clusters;

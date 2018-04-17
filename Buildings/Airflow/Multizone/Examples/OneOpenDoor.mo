@@ -24,7 +24,7 @@ model OneOpenDoor "Model with one open and one closed door"
     nPorts=4,
     m_flow_nominal=0.01)
     annotation (Placement(transformation(extent={{60,60},{80,80}})));
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
     annotation (Placement(transformation(extent={{14,60},{34,80}})));
   Modelica.Blocks.Sources.Sine heaSou(freqHz=1/3600) annotation (Placement(
         transformation(extent={{-60,60},{-40,80}})));
@@ -78,7 +78,7 @@ equation
         "Simulate and plot"),
     experiment(
       StopTime=7200,
-      Tolerance=1e-05),
+      Tolerance=1e-06),
     Documentation(info="<html>
 <p>
 This model consists of two doors with the same geometry.

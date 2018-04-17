@@ -53,7 +53,7 @@ model TraceSubstances "Test model for the extra property sensor"
     tau=0) "Sensor at exhaust air"
     annotation (Placement(transformation(extent={{50,-62},{30,-42}})));
 
-  FixedResistances.FixedResistanceDpM res(
+  FixedResistances.PressureDrop res(
     redeclare package Medium = Medium,
     dp_nominal=10,
     m_flow_nominal=0.005,
@@ -69,7 +69,7 @@ model TraceSubstances "Test model for the extra property sensor"
     "PPM sensor"
     annotation (Placement(transformation(extent={{100,10},{120,30}})));
 equation
-  connect(m_flow.y, mSou.m_flow_in) annotation (Line(points={{-59,-4},{0,-4}}, color={0,0,127}));
+  connect(m_flow.y, mSou.m_flow_in) annotation (Line(points={{-59,-4},{-2,-4}},color={0,0,127}));
   connect(senSou.C, masFraSou.m) annotation (Line(points={{45,100},{45,100},{139,
           100}}, color={0,0,127}));
   connect(senVol.C, masFraVol.m) annotation (Line(points={{121,60},{139,60}},
@@ -104,7 +104,7 @@ equation
   connect(senPPM.port, vol.ports[5]) annotation (Line(points={{110,10},{110,4},{
           86,4},{86,50},{87.2,50}},  color={0,127,255}));
     annotation (
-experiment(StopTime=7200),
+experiment(Tolerance=1e-6, StopTime=7200),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Sensors/Examples/TraceSubstances.mos"
         "Simulate and plot"),
     Diagram(coordinateSystem(preserveAspectRatio=false,extent={{-100,-100},{180,
@@ -126,7 +126,7 @@ revisions="<html>
 <li>
 May 22, 2015, by Michael Wetter:<br/>
 Updated example to test the correction for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/249\">issue 249</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/249\">issue 249</a>.
 </li>
 <li>
 May 8, 2014, by Michael Wetter:<br/>

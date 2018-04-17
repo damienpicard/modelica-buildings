@@ -1,6 +1,9 @@
-FixedResistanceDpM
+HydraulicDiameter
+Junction
 LosslessPipe
 Pipe
-SplitterFixedResistanceDpM
+PlugFlowPipe
+PressureDrop
 Examples
+Validation
 BaseClasses

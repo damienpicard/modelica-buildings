@@ -21,7 +21,7 @@ model PVPanels "This example illustrates how to use PV panel models"
     azi=-0.78539816339745) "Direct irradiation on tilted surface"
     annotation (Placement(transformation(extent={{-52,32},{-32,52}})));
   BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
-      computeWetBulbTemperature=false, filNam="modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos")
+      computeWetBulbTemperature=false, filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos"))
     annotation (Placement(transformation(extent={{-100,72},{-80,92}})));
   Modelica.Blocks.Math.Add G "Total irradiation on tilted surface"
     annotation (Placement(transformation(extent={{-12,52},{8,72}})));
@@ -80,9 +80,9 @@ equation
       points={{-10,10},{-28,10},{-28,-40},{20,-40}},
       color={0,120,120},
       smooth=Smooth.None));
-  annotation (experiment(StopTime=172800, Tolerance=1e-05),
+  annotation (experiment(StopTime=1.0, Tolerance=1e-6),
     __Dymola_Commands(file=
-          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/OnePhase/Sources/Examples/PVpanels.mos"
+          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/OnePhase/Sources/Examples/PVPanels.mos"
         "Simulate and plot"),
     Documentation(revisions="<html>
 <ul>

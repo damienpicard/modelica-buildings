@@ -34,7 +34,7 @@ model MixingVolumeSteadyStateMass "Test model for steady state mass dynamics"
 
   Modelica.Blocks.Math.Gain gain(k=0.01) "Gain for nominal mass flow rate"
     annotation (Placement(transformation(extent={{-60,-20},{-40,0}})));
-  FixedResistances.FixedResistanceDpM res(
+  FixedResistances.PressureDrop res(
     redeclare package Medium = Medium,
     m_flow_nominal=0.01,
     dp_nominal=1000) "Pressure drop"
@@ -44,7 +44,7 @@ equation
       points={{-69,-10},{-62,-10}},
       color={0,0,127}));
   connect(gain.y, sou.m_flow_in) annotation (Line(
-      points={{-39,-10},{-31.5,-10},{-31.5,-2},{-20,-2}},
+      points={{-39,-10},{-31.5,-10},{-31.5,-2},{-22,-2}},
       color={0,0,127}));
   connect(sou.ports[1], vol.ports[1]) annotation (Line(
       points={{0,-10},{38,-10},{38,20}},
@@ -70,7 +70,7 @@ First implementation.
 </li>
 </ul>
 </html>"),
-experiment(StopTime=1.0),
+experiment(Tolerance=1E-6, StopTime=1.0),
 __Dymola_Commands(file=
           "modelica://Buildings/Resources/Scripts/Dymola/Fluid/MixingVolumes/Validation/MixingVolumeSteadyStateMass.mos"
         "Simulate and plot"));

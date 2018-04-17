@@ -58,7 +58,7 @@ equation
       points={{10,-60},{6.66134e-16,-60},{6.66134e-16,-27}},
       color={0,120,120},
       smooth=Smooth.None));
-  annotation (experiment(StopTime=1.0, Tolerance=1e-05),
+  annotation (experiment(StopTime=1.0, Tolerance=1e-6),
   Documentation(
   info="<html>
 <p>
@@ -78,6 +78,6 @@ First implementation.
 </ul>
 </html>"),
 __Dymola_Commands(file=
-          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesBalanced/Sensors/Examples/GeneralizedProbe.mos"
+          "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesBalanced/Sensors/Examples/Probe.mos"
         "Simulate and plot"));
 end Probe;

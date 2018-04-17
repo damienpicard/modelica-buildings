@@ -36,16 +36,17 @@ model LakeWaterHeatExchanger_T "Heat exchanger with lake, ocean or river water"
 
   parameter Boolean from_dp = false
     "= true, use m_flow = f(dp) else dp = f(m_flow)"
-    annotation (Evaluate=true, Dialog(enable = computeFlowResistance,
+    annotation (Evaluate=true, Dialog(enable = (dpValve_nominal + dpHex_nominal) > 0,
                 tab="Flow resistance"));
 
   parameter Boolean linearizeFlowResistance = false
     "= true, use linear relation between m_flow and dp for any flow rate"
-    annotation(Dialog(enable = computeFlowResistance,
+    annotation(Dialog(enable = (dpValve_nominal + dpHex_nominal) > 0,
                tab="Flow resistance"));
   parameter Real deltaM = 0.1
     "Fraction of nominal flow rate where flow transitions to laminar"
-    annotation(Dialog(tab="Flow resistance"));
+    annotation(Dialog(enable = (dpValve_nominal + dpHex_nominal) > 0,
+               tab="Flow resistance"));
 
   Modelica.Blocks.Interfaces.RealInput TSouWat(
     unit="K",
@@ -76,52 +77,50 @@ model LakeWaterHeatExchanger_T "Heat exchanger with lake, ocean or river water"
   Modelica.Blocks.Interfaces.RealOutput QWat_flow(unit="W")
     "Heat exchanged with water reservoir (positive if added to reservoir)"
     annotation (Placement(transformation(extent={{100,110},{120,130}})));
-  Fluid.Actuators.Valves.ThreeWayLinear valCoo(
-    redeclare final package Medium =  Medium,
-    final m_flow_nominal=m_flow_nominal,
-    dpValve_nominal=1000,
-    filteredOpening=false,
-    final energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyStateInitial,
-    final dpFixed_nominal={if disableHeatExchanger then 0 else dpHex_nominal,0})
-    "Switching valve for cooling"                                       annotation (
-      Placement(transformation(
-        extent={{-10,-10},{10,10}},
-        rotation=0,
-        origin={50,60})));
-  Fluid.Actuators.Valves.ThreeWayLinear valHea(
+  Buildings.Fluid.Actuators.Valves.ThreeWayLinear valCoo(
     redeclare final package Medium = Medium,
     final m_flow_nominal=m_flow_nominal,
     dpValve_nominal=1000,
-    filteredOpening=false,
+    use_inputFilter=false,
     final energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyStateInitial,
     final dpFixed_nominal={if disableHeatExchanger then 0 else dpHex_nominal,0})
-    "Switching valve for heating"
-    annotation (Placement(transformation(
+    "Switching valve for cooling" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
-        rotation=0,
+        origin={50,60})));
+  Buildings.Fluid.Actuators.Valves.ThreeWayLinear valHea(
+    redeclare final package Medium = Medium,
+    final m_flow_nominal=m_flow_nominal,
+    dpValve_nominal=1000,
+    use_inputFilter=false,
+    final energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyStateInitial,
+    final dpFixed_nominal={if disableHeatExchanger then 0 else dpHex_nominal,0})
+    "Switching valve for heating" annotation (Placement(transformation(
+        extent={{-10,-10},{10,10}},
         origin={50,-60})));
 
 protected
-  Fluid.HeatExchangers.HeaterCooler_T coo(
+  Buildings.Fluid.HeatExchangers.SensibleCooler_T coo(
     redeclare final package Medium = Medium,
     final m_flow_nominal=m_flow_nominal,
     final dp_nominal=0,
-    final Q_flow_maxHeat=0,
     final allowFlowReversal=true,
     final show_T=false,
     final from_dp=from_dp,
     final linearizeFlowResistance=linearizeFlowResistance,
     final deltaM=deltaM,
     final energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
-    Q_flow_maxCool=if disableHeatExchanger then 0 else -Modelica.Constants.inf)
+    QMin_flow=if disableHeatExchanger then 0 else -Modelica.Constants.inf)
     "Heat exchanger effect for mode in which water is cooled"
     annotation (Placement(transformation(extent={{10,50},{-10,70}})));
-  Modelica.Blocks.Sources.RealExpression TWarIn(y=Medium.temperature_phX(
-        p=port_b1.p,
-        h=inStream(port_b1.h_outflow),
-        X=inStream(port_b1.Xi_outflow))) "Warm water inlet temperature"
+  Modelica.Blocks.Sources.RealExpression TWarIn(y=
+    Medium.temperature_phX(
+      p=port_b1.p,
+      h=inStream(port_b1.h_outflow),
+      X=cat(1,inStream(port_b1.Xi_outflow),
+              {1-sum(inStream(port_b1.Xi_outflow))})))
+        "Warm water inlet temperature"
     annotation (Placement(transformation(extent={{-40,156},{-20,176}})));
-  Fluid.HeatExchangers.HeaterCooler_T hea(
+  Buildings.Fluid.HeatExchangers.Heater_T hea(
     redeclare final package Medium = Medium,
     final m_flow_nominal=m_flow_nominal,
     final dp_nominal=0,
@@ -131,14 +130,15 @@ protected
     final linearizeFlowResistance=linearizeFlowResistance,
     final deltaM=deltaM,
     final energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
-    Q_flow_maxCool=0,
-    Q_flow_maxHeat=if disableHeatExchanger then 0 else Modelica.Constants.inf)
+    QMax_flow=if disableHeatExchanger then 0 else Modelica.Constants.inf)
     "Heat exchanger effect for mode in which water is heated"
     annotation (Placement(transformation(extent={{10,-50},{-10,-30}})));
-  Modelica.Blocks.Sources.RealExpression TColIn(y=Medium.temperature_phX(
-        p=port_a2.p,
-        h=inStream(port_a2.h_outflow),
-        X=inStream(port_a2.Xi_outflow))) "Cold water inlet temperature"
+  Modelica.Blocks.Sources.RealExpression TColIn(y=
+    Medium.temperature_phX(
+      p=port_a2.p,
+      h=inStream(port_a2.h_outflow),
+      X=cat(1, inStream(port_a2.Xi_outflow),
+               {1-sum(inStream(port_a2.Xi_outflow))}))) "Cold water inlet temperature"
     annotation (Placement(transformation(extent={{-40,98},{-20,118}})));
   Utilities.Math.SmoothMax maxHeaLea(deltaX=0.1) "Maximum leaving temperature"
     annotation (Placement(transformation(extent={{8,104},{28,124}})));
@@ -151,10 +151,10 @@ protected
   Modelica.Blocks.Sources.Constant TAppHex(k=TApp)
     "Approach temperature difference"
     annotation (Placement(transformation(extent={{-80,180},{-60,200}})));
-  Modelica.Blocks.Math.Add TWatHea
+  Modelica.Blocks.Math.Add TWatHea(k2=-1)
     "Heat exchanger outlet, taking into account approach"
     annotation (Placement(transformation(extent={{40,190},{60,210}})));
-  Modelica.Blocks.Math.Add TWatCoo(k2=-1)
+  Modelica.Blocks.Math.Add TWatCoo
     "Heat exchanger outlet, taking into account approach"
     annotation (Placement(transformation(extent={{40,220},{60,240}})));
   Modelica.Blocks.Math.Add QExc_flow(k1=-1) "Heat added to water reservoir"
@@ -166,16 +166,16 @@ protected
 
   Controller conCoo(final m_flow_nominal=m_flow_nominal)
     "Controller for hex for cooling" annotation (Placement(transformation(
-          rotation=0, extent={{-40,20},{-20,40}})));
-  Fluid.Sensors.MassFlowRate senMasFloCoo(redeclare package Medium = Medium)
+          extent={{-40,20},{-20,40}})));
+  Buildings.Fluid.Sensors.MassFlowRate senMasFloCoo(redeclare package Medium = Medium)
     "Mass flow sensor used for cooling control"
     annotation (Placement(transformation(extent={{-52,50},{-72,70}})));
-  Fluid.Sensors.MassFlowRate senMasFloHea(redeclare package Medium = Medium)
+  Buildings.Fluid.Sensors.MassFlowRate senMasFloHea(redeclare package Medium = Medium)
     "Mass flow sensor used for heating control"
     annotation (Placement(transformation(extent={{-42,-50},{-62,-30}})));
   Controller conHea(final m_flow_nominal=m_flow_nominal)
     "Controller for hex for heating" annotation (Placement(transformation(
-          rotation=0, extent={{-60,-90},{-40,-70}})));
+          extent={{-60,-90},{-40,-70}})));
 equation
   connect(TColIn.y, maxHeaLea.u2) annotation (Line(points={{-19,108},{-19,108},{
           6,108}},             color={0,0,127}));
@@ -183,14 +183,14 @@ equation
     annotation (Line(points={{29,114},{42,114},{42,120},{42,124},{50,124}},
                                                           color={0,0,127}));
   connect(minHeaLvg.y, hea.TSet) annotation (Line(points={{73,130},{86,130},{86,
-          -34},{12,-34}}, color={0,0,127}));
+          -32},{12,-32}}, color={0,0,127}));
   connect(TWarIn.y, minCooLvg.u1) annotation (Line(points={{-19,166},{-19,166},{
           6,166}},       color={0,0,127}));
   connect(minCooLvg.y, maxCooLea.u2)
     annotation (Line(points={{29,160},{29,160},{50,160}},
                                                 color={0,0,127}));
   connect(maxCooLea.y, coo.TSet) annotation (Line(points={{73,166},{80,166},{80,
-          80},{20,80},{20,66},{12,66}},
+          80},{20,80},{20,68},{12,68}},
                     color={0,0,127}));
   connect(TAppHex.y, TWatHea.u2)
     annotation (Line(points={{-59,190},{-40,190},{-40,194},{38,194}},
@@ -203,9 +203,9 @@ equation
   connect(TWatHea.y, maxHeaLea.u1) annotation (Line(points={{61,200},{68,200},{68,
           186},{-6,186},{-6,120},{6,120}},
                          color={0,0,127}));
-  connect(coo.Q_flow, QExc_flow.u1) annotation (Line(points={{-11,66},{-16,66},{
-          -16,6},{18,6}}, color={0,0,127}));
-  connect(hea.Q_flow, QExc_flow.u2) annotation (Line(points={{-11,-34},{-11,-34},
+  connect(coo.Q_flow, QExc_flow.u1) annotation (Line(points={{-11,68},{-16,68},
+          {-16,6},{18,6}},color={0,0,127}));
+  connect(hea.Q_flow, QExc_flow.u2) annotation (Line(points={{-11,-32},{-11,-34},
           {-14,-34},{-14,-6},{18,-6}}, color={0,0,127}));
   connect(QExc_flow.y, QWat_flow) annotation (Line(points={{41,0},{66,0},{90,0},
           {90,120},{110,120}}, color={0,0,127}));
@@ -225,7 +225,11 @@ protected
     parameter Modelica.SIunits.MassFlowRate m_flow_nominal
       "Nominal mass flow rate"
       annotation(Dialog(group = "Nominal condition"));
-    Modelica.Blocks.Nonlinear.Limiter limTem(        uMax=1, uMin=0)
+    Modelica.Blocks.Nonlinear.Limiter limTem(
+      uMax=1,
+      uMin=0,
+      limitsAtInit=false,
+      strict=true)
       "Signal limiter for switching valve"
       annotation (Placement(transformation(extent={{20,60},{40,80}})));
     Modelica.Blocks.Math.Gain gaiTem(k=4) "Control gain for dT"
@@ -233,21 +237,25 @@ protected
     Modelica.Blocks.Math.Feedback feeBac "Control error"
       annotation (Placement(transformation(extent={{-60,60},{-40,80}})));
     Modelica.Blocks.Interfaces.RealInput u1 annotation (Placement(transformation(
-            rotation=0, extent={{-120,60},{-100,80}})));
+            extent={{-120,60},{-100,80}})));
     Modelica.Blocks.Interfaces.RealInput u2 annotation (Placement(transformation(
           rotation=90,
           extent={{-10,-10},{10,10}},
           origin={0,-10})));
     Modelica.Blocks.Interfaces.RealOutput y
       "Control signal (0: bypass hex, 1: use hex)"
-                                            annotation (Placement(transformation(
-            rotation=0, extent={{100,90},{120,110}})));
+      annotation (Placement(transformation(
+            extent={{100,90},{120,110}})));
     Modelica.Blocks.Interfaces.RealInput m_flow "Mass flow rate" annotation (
-        Placement(transformation(rotation=0, extent={{-120,120},{-100,140}})));
+        Placement(transformation(extent={{-120,120},{-100,140}})));
     Modelica.Blocks.Math.Gain norFlo(final k=1/m_flow_nominal)
       "Normalized flow rate"
       annotation (Placement(transformation(extent={{-80,120},{-60,140}})));
-    Modelica.Blocks.Nonlinear.Limiter limFlo(        uMax=1, uMin=0)
+    Modelica.Blocks.Nonlinear.Limiter limFlo(
+      uMax=1,
+      uMin=0,
+      limitsAtInit=false,
+      strict=true)
       "Signal limiter for switching valve"
       annotation (Placement(transformation(extent={{20,120},{40,140}})));
     Modelica.Blocks.Math.Gain gaiFlo(k=100) "Control gain for flow rate"
@@ -441,6 +449,29 @@ instances <code>valCoo</code> and <code>valHea</code>.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+February 3, 2017, by Felix Buenning:<br/>
+Corrected wrong signs for <code>TApp</code> in <code>TWatCoo</code> and <code>TWatHea</code>.
+</li>
+<li>
+November 8, 2016, by Michael Wetter:<br/>
+Corrected wrong argument type in function call of <code>Medium.temperature_phX</code>.
+</li>
+<li>
+September 17, 2016, by Michael Wetter:<br/>
+Corrected wrong annotation to avoid an error in the pedantic model check
+in Dymola 2017 FD01 beta2.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/557\">issue 557</a>.
+</li>
+<li>
+August 11, 2016, by Michael Wetter:<br/>
+Reconfigured output limiters of controllers to avoid event iterations when
+they saturate. This decreases the computing time for the system models
+by about a factor of two.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/551\">issue 551</a>.
+</li>
 <li>
 May 31, 2016, by Michael Wetter:<br/>
 Renamed <code>dp_nominal</code> to <code>dpHex_nominal</code>

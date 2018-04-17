@@ -57,7 +57,7 @@ protected
     final allowFlowReversal=allowFlowReversal,
     final m_flow_nominal=m_flow_nominal,
     final inputType=Buildings.Fluid.Types.InputType.Continuous,
-    final filteredSpeed=false) "Pump"
+    final use_inputFilter=false) "Pump"
     annotation (Placement(transformation(extent={{-40,-10},{-20,10}})));
 
   Modelica.Blocks.Math.Gain mPum_flow "Mass flow rate"
@@ -75,8 +75,7 @@ equation
   connect(pum.P, PPum) annotation (Line(points={{-19,8},{-10,8},{-10,40},{60,40},
           {60,60},{110,60}}, color={0,0,127}));
 
-  annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-            -100},{100,100}})), Icon(coordinateSystem(preserveAspectRatio=false,
+  annotation ( Icon(coordinateSystem(preserveAspectRatio=false,
           extent={{-100,-100},{100,100}}),
                                      graphics={
                                 Rectangle(

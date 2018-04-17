@@ -2,25 +2,28 @@ within Buildings.Fluid.HeatExchangers;
 model WetCoilCounterFlow
   "Counterflow coil with discretization along the flow paths and humidity condensation"
   extends Buildings.Fluid.HeatExchangers.DryCoilCounterFlow(
-      redeclare each final
+    redeclare replaceable package Medium2 =
+      Modelica.Media.Interfaces.PartialCondensingGases,
+    redeclare final
       Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent ele[nEle]);
 
-  Modelica.SIunits.HeatFlowRate QSen2_flow
+  Modelica.SIunits.HeatFlowRate QSen2_flow = Q2_flow - QLat2_flow
     "Sensible heat input into air stream (negative if air is cooled)";
-  Modelica.SIunits.HeatFlowRate QLat2_flow
+
+  Modelica.SIunits.HeatFlowRate QLat2_flow=
+    Buildings.Utilities.Psychrometrics.Constants.h_fg * mWat_flow
     "Latent heat input into air (negative if air is dehumidified)";
+
   Real SHR(
     min=0,
     max=1,
-    unit="1") "Sensible to total heat ratio";
+    unit="1") = QSen2_flow /
+      noEvent(if (Q2_flow > 1E-6 or Q2_flow < -1E-6) then Q2_flow else 1)
+       "Sensible to total heat ratio";
 
-  Modelica.SIunits.MassFlowRate mWat_flow "Water flow rate";
+  Modelica.SIunits.MassFlowRate mWat_flow = sum(ele[i].vol2.mWat_flow for i in 1:nEle)
+    "Water flow rate";
 
-equation
-  mWat_flow = sum(ele[i].vol2.mWat_flow for i in 1:nEle);
-  QLat2_flow = sum(Medium2.enthalpyOfCondensingGas(ele[i].vol2.heatPort.T)*ele[i].vol2.mWat_flow for i in 1:nEle);
-  Q2_flow = QSen2_flow + QLat2_flow;
-  Q2_flow*SHR = QSen2_flow;
  annotation (
 defaultComponentName="cooCoi",
     Documentation(info="<html>
@@ -30,8 +33,8 @@ The coil consists of two flow paths which are, at the design flow direction,
 in opposite direction to model a counterflow heat exchanger.
 The flow paths are discretized into <code>nEle</code> elements.
 Each element is modeled by an instance of
-<a href=\"modelica://Buildings.Fluid.HeatExchangers.BaseClasses.HexElement\">
-Buildings.Fluid.HeatExchangers.BaseClasses.HexElement</a>.
+<a href=\"modelica://Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent\">
+Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent</a>.
 Each element has a state variable for the metal.
 </p>
 <p>
@@ -70,6 +73,42 @@ Buildings.Fluid.HeatExchangers.DryCoilCounterFlow</a> instead of this model.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+April 14, 2017, by David Blum:<br/>
+Added heat of condensation to coil surface heat balance
+and removed it from the air stream.
+This gives higher coil surface temperature and avoids
+overestimating the latent heat ratio that was
+observed in the previous implementation.
+The code change was in
+<a href=\"modelica://Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent\">
+Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent</a>.<br/>
+This is for <a href=\"https://github.com/lbl-srg/modelica-buildings/issues/711\">#711</a>.
+</li>
+<li>
+April 11, 2017, by Michael Wetter:<br/>
+Changed computation of <code>QLat_flow</code> to be consistent with
+how it is computed in
+<a href=\"modelica://Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent\">
+Buildings.Fluid.HeatExchangers.BaseClasses.HexElementLatent</a>.<br/>
+Moved variable assignments out of equation section to avoid mixing
+textual and graphical modeling in equation section.
+</li>
+<li>
+November 8, 2016, by Michael Wetter:<br/>
+Removed wrong usage of <code>each</code> keyword.
+</li>
+<li>
+July 29, 2016, by Michael Wetter:<br/>
+Redeclared <code>Medium2</code> to be <code>Modelica.Media.Interfaces.PartialCondensingGases</code>
+because it is used in <code>vol2</code> and because
+the model calls <code>Medium2.enthalpyOfCondensingGas</code>,
+which requires the medium to extend
+from this subclass.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/547\">
+issue 547</a>.
+</li>
 <li>
 February 2, 2012, by Michael Wetter:<br/>
 Corrected error in assignment of <code>dp2_nominal</code> in the base class.

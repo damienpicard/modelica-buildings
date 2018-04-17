@@ -22,7 +22,7 @@ model WindowRadiation "Test model for window radiation"
   BoundaryConditions.WeatherData.Bus weaBus "Weather data bus"
     annotation (Placement(transformation(extent={{-38,0},{-18,20}})));
   BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam=
-        "modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
+        Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos"))
     "Weather data reader"
     annotation (Placement(transformation(extent={{-70,0},{-50,20}})));
 
@@ -98,7 +98,7 @@ equation
       color={0,0,127},
       smooth=Smooth.None));
   annotation (
-experiment(StopTime=864000),
+experiment(Tolerance=1e-6, StopTime=864000),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/HeatTransfer/Windows/BaseClasses/Examples/WindowRadiation.mos"
         "Simulate and plot"),
     Documentation(info="<html>

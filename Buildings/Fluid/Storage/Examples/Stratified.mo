@@ -29,12 +29,12 @@ model Stratified "Test model for stratified tank"
     p=300000,
     nPorts=2)             annotation (Placement(transformation(extent={{90,-2},
             {70,18}})));
-    FixedResistances.FixedResistanceDpM res_1(
+  Buildings.Fluid.FixedResistances.PressureDrop res_1(
     from_dp=true,
     redeclare package Medium = Medium,
     dp_nominal=5000,
     m_flow_nominal=0.1)
-             annotation (Placement(transformation(extent={{36,0},{56,20}})));
+    annotation (Placement(transformation(extent={{36,0},{56,20}})));
   Buildings.Fluid.Storage.StratifiedEnhanced tanEnh(
     redeclare package Medium = Medium,
     hTan=3,
@@ -43,18 +43,18 @@ model Stratified "Test model for stratified tank"
     m_flow_nominal=0.1,
     VTan=3) "Tank"             annotation (Placement(transformation(extent={{-18,-38},
             {2,-18}})));
-    FixedResistances.FixedResistanceDpM res_2(
+  Buildings.Fluid.FixedResistances.PressureDrop res_2(
     from_dp=true,
     redeclare package Medium = Medium,
     dp_nominal=5000,
     m_flow_nominal=0.1)
-             annotation (Placement(transformation(extent={{38,-38},{58,-18}})));
-  Buildings.Fluid.Sensors.EnthalpyFlowRate HOut_flow(redeclare package Medium
-      = Medium, m_flow_nominal=0.1) "Enthalpy flow rate"
+    annotation (Placement(transformation(extent={{38,-38},{58,-18}})));
+  Buildings.Fluid.Sensors.EnthalpyFlowRate HOut_flow(redeclare package Medium =
+        Medium, m_flow_nominal=0.1) "Enthalpy flow rate"
                                      annotation (Placement(transformation(
           extent={{6,2},{22,18}})));
-  Buildings.Fluid.Sensors.EnthalpyFlowRate HOut_flow1(redeclare package Medium
-      = Medium, m_flow_nominal=0.1) "Enthalpy flow rate"
+  Buildings.Fluid.Sensors.EnthalpyFlowRate HOut_flow1(redeclare package Medium =
+        Medium, m_flow_nominal=0.1) "Enthalpy flow rate"
                                      annotation (Placement(transformation(
           extent={{18,-36},{34,-20}})));
   Modelica.Blocks.Continuous.Integrator dH
@@ -143,7 +143,7 @@ equation
       points={{-28,72},{-8,72},{-8,17.4}},
       color={191,0,0},
       smooth=Smooth.None));
-  annotation(experiment(StopTime=10800),
+  annotation(experiment(Tolerance=1e-08, StopTime=10800),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/Storage/Examples/Stratified.mos"
         "Simulate and plot"),
     Documentation(info="<html>

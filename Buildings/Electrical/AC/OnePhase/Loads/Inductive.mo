@@ -2,7 +2,7 @@ within Buildings.Electrical.AC.OnePhase.Loads;
 model Inductive "Model of an inductive and resistive load"
   extends Buildings.Electrical.Interfaces.InductiveLoad(
     redeclare package PhaseSystem = PhaseSystems.OnePhase,
-    redeclare Interfaces.Terminal_n terminal,
+    redeclare replaceable Interfaces.Terminal_n terminal,
     V_nominal(start = 110));
 
 protected
@@ -179,7 +179,7 @@ i<sub>2</sub> = (P V<sub>2</sub> - Q V<sub>1</sub>)/V<sub>RMS</sub><sup>2</sup>,
 <p>
 where <i>V<sub>RMS</sub></i> is the Root Mean Square voltage of the AC system.
 Even though this linearized version of the load model introduces an approximation
-error in the current, it satisfies the contraints related to the ratio of the
+error in the current, it satisfies the constraints related to the ratio of the
 active and reactive powers.
 </p>
 
@@ -203,6 +203,12 @@ The choices are between a null current or the linearized model.
 
 </html>", revisions="<html>
 <ul>
+<li>
+November 8, 2016, by Michael Wetter:<br/>
+Added <code>replaceable</code> to terminal redeclaration as they are redeclared by
+<a href=\"modelica://Buildings.Electrical.AC.ThreePhasesBalanced.Loads.Inductive\">
+Buildings.Electrical.AC.ThreePhasesBalanced.Loads.Inductive</a>.
+</li>
 <li>
 May 26, 2016, by Michael Wetter:<br/>
 Moved function call to <code>PhaseSystem.thetaRef</code> out of

@@ -8,7 +8,7 @@ model FixedShade "Test model for the fixed shade model"
     each lat=weaDat.lat) "Shade model"
     annotation (Placement(transformation(extent={{60,-10},{80,10}})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(
-    filNam="modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
+    filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos"))
     annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
   Buildings.BoundaryConditions.SolarIrradiation.DirectTiltedSurface HDirTil(
     lat=weaDat.lat,
@@ -19,7 +19,7 @@ model FixedShade "Test model for the fixed shade model"
     annotation (Placement(transformation(extent={{20,60},{40,80}})));
   Modelica.Blocks.Routing.Replicator incAng(nout=4) "Replicator"
     annotation (Placement(transformation(extent={{20,20},{40,40}})));
-  parameter Buildings.Rooms.BaseClasses.ParameterConstructionWithWindow conPar[4](
+  parameter Buildings.ThermalZones.Detailed.BaseClasses.ParameterConstructionWithWindow conPar[4](
     each til=Buildings.Types.Tilt.Wall,
     each azi=Buildings.Types.Azimuth.S,
     each A=20,
@@ -86,7 +86,7 @@ equation
       color={255,204,51},
       thickness=0.5,
       smooth=Smooth.None));
-  annotation (experiment(StopTime=86400),
+  annotation (experiment(Tolerance=1e-6, StopTime=86400),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/HeatTransfer/Windows/Examples/FixedShade.mos"
         "Simulate and plot"),
     Documentation(info="<html>

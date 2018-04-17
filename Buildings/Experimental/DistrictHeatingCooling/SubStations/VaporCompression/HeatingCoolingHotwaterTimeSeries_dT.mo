@@ -189,9 +189,7 @@ model HeatingCoolingHotwaterTimeSeries_dT
     etaCarnot_nominal=0.3,
     QCon_flow_nominal=QHea_flow_nominal,
     dp1_nominal=dp_nominal,
-    dp2_nominal=dp_nominal,
-    effInpEva=Buildings.Fluid.Types.EfficiencyInput.port_a,
-    effInpCon=Buildings.Fluid.Types.EfficiencyInput.port_a) "Heat pump"
+    dp2_nominal=dp_nominal)                                 "Heat pump"
     annotation (Placement(transformation(extent={{22,212},{42,232}})));
 
   Buildings.Fluid.Movers.FlowControlled_m_flow pumHea(
@@ -200,7 +198,7 @@ model HeatingCoolingHotwaterTimeSeries_dT
     allowFlowReversal=allowFlowReversal,
     m_flow_nominal=mHeaEva_flow_nominal,
     inputType=Buildings.Fluid.Types.InputType.Continuous,
-    filteredSpeed=false,
+    use_inputFilter=false,
     addPowerToMedium=false) "Pump for space heating heat pump"
     annotation (Placement(transformation(extent={{30,290},{50,310}})));
 
@@ -216,7 +214,7 @@ model HeatingCoolingHotwaterTimeSeries_dT
     m_flow_nominal=mHotWatEva_flow_nominal,
     allowFlowReversal=allowFlowReversal,
     inputType=Buildings.Fluid.Types.InputType.Continuous,
-    filteredSpeed=false,
+    use_inputFilter=false,
     addPowerToMedium=false) "Pump"
     annotation (Placement(transformation(extent={{30,-10},{50,10}})));
 
@@ -231,9 +229,7 @@ model HeatingCoolingHotwaterTimeSeries_dT
     dp1_nominal=dp_nominal,
     dp2_nominal=dp_nominal,
     QCon_flow_nominal=QHotWat_flow_nominal,
-    dTCon_nominal=dTHotWatCon_nominal,
-    effInpEva=Buildings.Fluid.Types.EfficiencyInput.port_a,
-    effInpCon=Buildings.Fluid.Types.EfficiencyInput.port_a) "Heat pump"
+    dTCon_nominal=dTHotWatCon_nominal)                      "Heat pump"
     annotation (Placement(transformation(extent={{20,-92},{40,-72}})));
 
   Buildings.Fluid.Chillers.Carnot_TEva chi(
@@ -247,9 +243,7 @@ model HeatingCoolingHotwaterTimeSeries_dT
     dTEva_nominal=dTCooEva_nominal,
     dTCon_nominal=dTCooCon_nominal,
     allowFlowReversal1=allowFlowReversal,
-    allowFlowReversal2=false,
-    effInpEva=Buildings.Fluid.Types.EfficiencyInput.port_a,
-    effInpCon=Buildings.Fluid.Types.EfficiencyInput.port_a) "Chiller"
+    allowFlowReversal2=false)                               "Chiller"
     annotation (Placement(transformation(extent={{-80,-354},{-60,-334}})));
 
   Buildings.Fluid.Movers.FlowControlled_m_flow pumChi(
@@ -257,7 +251,7 @@ model HeatingCoolingHotwaterTimeSeries_dT
     energyDynamics=Modelica.Fluid.Types.Dynamics.SteadyState,
     allowFlowReversal=allowFlowReversal,
     inputType=Buildings.Fluid.Types.InputType.Continuous,
-    filteredSpeed=false,
+    use_inputFilter=false,
     m_flow_nominal=mCooCon_flow_nominal,
     addPowerToMedium=false) "Pump"
     annotation (Placement(transformation(extent={{-122,-304},{-102,-284}})));
@@ -278,12 +272,13 @@ protected
   Modelica.Blocks.Sources.CombiTimeTable loa(
     tableOnFile=true,
     tableName="tab1",
-    fileName=Buildings.BoundaryConditions.WeatherData.BaseClasses.getAbsolutePath(filNam),
+    fileName=Modelica.Utilities.Files.loadResource(filNam),
     extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
     y(each unit="W"),
     offset={0,0,0},
     columns={2,3,4},
-    smoothness=Modelica.Blocks.Types.Smoothness.LinearSegments) "Loads"
+    smoothness=Modelica.Blocks.Types.Smoothness.MonotoneContinuousDerivative1)
+    "Loads"
     annotation (Placement(transformation(extent={{-260,400},{-240,420}})));
 
   Modelica.Blocks.Routing.DeMultiplex3 deMul "De multiplex"
@@ -427,6 +422,9 @@ initial equation
     "Nominal hot water heating rate must be strictly positive. Obtained QHotWat_flow_nominal = "
     + String(QHotWat_flow_nominal));
 
+
+
+
 equation
   connect(pumHea.port_b, heaPum.port_a2) annotation (Line(points={{50,300},{50,
           300},{100,300},{100,216},{42,216}},
@@ -460,8 +458,8 @@ equation
   connect(PHeaAct.y, PHea) annotation (Line(points={{101,320},{220,320},{220,
           280},{290,280}},
                       color={0,0,127}));
-  connect(PHeaAct.u1, pumHea.P) annotation (Line(points={{78,326},{58,326},{58,
-          308},{51,308}}, color={0,0,127}));
+  connect(PHeaAct.u1, pumHea.P) annotation (Line(points={{78,326},{58,326},{58,309},
+          {51,309}},      color={0,0,127}));
   connect(PHeaAct.u2, heaPum.P) annotation (Line(points={{78,314},{60,314},{60,
           280},{48,280},{48,222},{43,222}},
                                       color={0,0,127}));
@@ -470,8 +468,8 @@ equation
           0,127}));
   connect(PHotWatAct.u2, heaPumHotWat.P) annotation (Line(points={{98,14},{60,
           14},{60,-20},{48,-20},{48,-82},{41,-82}}, color={0,0,127}));
-  connect(PHotWatAct.u1, pumHotWat.P) annotation (Line(points={{98,26},{58,26},
-          {58,8},{51,8}},     color={0,0,127}));
+  connect(PHotWatAct.u1, pumHotWat.P) annotation (Line(points={{98,26},{58,26},{
+          58,9},{51,9}},      color={0,0,127}));
   connect(heaPumHotWat.port_b1, sinHotWat.ports[1]) annotation (Line(points={{40,-76},
           {40,-74},{46,-74},{52,-74}},          color={0,127,255}));
   connect(souHotWat.ports[1], heaPumHotWat.port_a1) annotation (Line(points={{-2,-76},
@@ -496,7 +494,7 @@ equation
   connect(chi.port_a2, sou1.ports[1])
     annotation (Line(points={{-60,-350},{-38,-350}}, color={0,127,255}));
   connect(mPumCoo_flow.y, pumChi.m_flow_in) annotation (Line(points={{-159,-270},
-          {-159,-270},{-112,-270},{-112,-276},{-112.2,-276},{-112.2,-282}},
+          {-159,-270},{-112,-270},{-112,-276},{-112,-276},{-112,-282}},
                                         color={0,0,127}));
   connect(mPumCoo_flow.u, QCon_flow.y)
     annotation (Line(points={{-182,-270},{-182,-270},{-182,-268},{-182,-270},{-190,
@@ -512,9 +510,8 @@ equation
   connect(PCooAct.y, PCoo) annotation (Line(points={{101,-300},{168,-300},{168,
           200},{290,200}},
                       color={0,0,127}));
-  connect(PCooAct.u1, pumChi.P) annotation (Line(points={{78,-294},{66,-294},{
-          66,-286},{-101,-286}},
-                              color={0,0,127}));
+  connect(PCooAct.u1, pumChi.P) annotation (Line(points={{78,-294},{66,-294},{66,
+          -285},{-101,-285}}, color={0,0,127}));
   connect(PCooAct.u2, chi.P) annotation (Line(points={{78,-306},{66,-306},{66,
           -314},{-50,-314},{-50,-344},{-59,-344}},
                              color={0,0,127}));
@@ -592,11 +589,11 @@ equation
   connect(QEvaHotWat_flow.y, mPumHotWat_flow.u)
     annotation (Line(points={{-19,40},{-2,40}}, color={0,0,127}));
   connect(mPumHotWat_flow.y, pumHotWat.m_flow_in)
-    annotation (Line(points={{21,40},{39.8,40},{39.8,12}}, color={0,0,127}));
+    annotation (Line(points={{21,40},{40,40},{40,12}},     color={0,0,127}));
   connect(QEva_flow.y, mPumHea_flow.u)
     annotation (Line(points={{-19,330},{-2,330},{-2,330}}, color={0,0,127}));
-  connect(mPumHea_flow.y, pumHea.m_flow_in) annotation (Line(points={{21,330},{39.8,
-          330},{39.8,312}}, color={0,0,127}));
+  connect(mPumHea_flow.y, pumHea.m_flow_in) annotation (Line(points={{21,330},{40,
+          330},{40,312}},   color={0,0,127}));
   connect(deMul.y1[1], mPumCooEva_flow.u) annotation (Line(points={{-157,417},{-106,
           417},{-106,-220},{50,-220},{50,-340},{42,-340}}, color={0,0,127}));
   connect(mPumCooEva_flow.y, sou1.m_flow_in) annotation (Line(points={{19,-340},
@@ -633,14 +630,14 @@ double tab1(8760,4)
 [to be continued]
 </pre>
 <p>
-Values at intermediate times are linearly interpolated.
+Values at intermediate times are interpolated using cubic Hermite splines.
 </p>
 <h4>Implementation</h4>
 <p>
-The time series data are interpolated using linear interpolation because
-the option to use continuous derivates leads to loads that cross zero.
-For example, the heating required for hot water preparation can sometimes be negative
-if interpolation with continuous derivatives were to be selected.
+The time series data are interpolated using
+Fritsch-Butland interpolation. This uses
+cubic Hermite splines such that y preserves the monotonicity and
+der(y) is continuous, also if extrapolated.
 </p>
 <p>
 There is a control volume at each of the two fluid ports
@@ -650,6 +647,36 @@ of equations if multiple substations are connected to each other.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+December 12, 2017, by Michael Wetter:<br/>
+Removed call to <code>Modelica.Utilities.Files.loadResource</code>.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/1097\">issue 1097</a>.
+</li>
+<li>
+November 28, 2016, by Michael Wetter:<br/>
+Added call to <code>Modelica.Utilities.Files.loadResource</code>.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/585\">#585</a>.
+</li>
+<li>
+August 8, 2016, by Michael Wetter:<br/>
+Changed default temperature to compute COP to be the leaving temperature as
+use of the entering temperature can violate the 2nd law if the temperature
+lift is small.<br/>
+This is for
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/497\">
+Annex 60, issue 497</a>.
+</li>
+<li>
+June 26, 2016, by Michael Wetter:<br/>
+Changed interpolation for combi table with load data
+to use cubic hermite splines.
+This is because previously, the table did not generate events
+when using linear interpolation, which caused the
+solver to take too big steps, missing data points in the table.
+This is due to Dassault SR00312338.
+</li>
 <li>
 April 21, 2016, by Michael Wetter:<br/>
 Added gains to scale loads and peak load.

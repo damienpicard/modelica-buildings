@@ -85,7 +85,7 @@ initial equation
   assert(m2_flow_nominal > 0,
     "m2_flow_nominal must be positive, m2_flow_nominal = " + String(
     m2_flow_nominal));
-  
+
   cp1_nominal = Medium1.specificHeatCapacityCp(sta1_default);
   cp2_nominal = Medium2.specificHeatCapacityCp(sta2_default);
 
@@ -219,7 +219,7 @@ zero flow, <code>Z</code> can be larger than one due to the regularization.
 As <code>Z</code> is not used in this model other than for reporting, this bound
 need not be enforced (and the calculation of <code>eps</code> is fine at these small flow rates).
 This is for
-<a href=\"modelica://https://github.com/lbl-srg/modelica-buildings/issues/490\">issue 490</a>.
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/490\">issue 490</a>.
 </li>
 <li>
 April 29, 2014 by Michael Wetter:<br/>

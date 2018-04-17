@@ -39,7 +39,7 @@ model Plant_Carnot_T_ClosedLoop
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={-60,-62})));
-  Fluid.MixingVolumes.MixingVolume vol(nPorts=2,
+  Buildings.Fluid.MixingVolumes.MixingVolume vol(nPorts=2,
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
@@ -48,7 +48,7 @@ model Plant_Carnot_T_ClosedLoop
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={60,-30})));
-  Fluid.Movers.FlowControlled_m_flow pum(
+  Buildings.Fluid.Movers.FlowControlled_m_flow pum(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal,
     addPowerToMedium=false,
@@ -71,15 +71,16 @@ model Plant_Carnot_T_ClosedLoop
     "Set point temperature for leaving water"
     annotation (Placement(transformation(extent={{-90,10},{-70,30}})));
   Modelica.Blocks.Sources.CombiTimeTable TOut(table=[
-    0,273.15 + 14;
-    3*3600, 273.15+14;
-    3*3600, 273.15+0;
-    6*3600, 273.15+0;
-    6*3600, 273.15+20;
-    12*3600, 273.15+20;
-    12*3600, 273.15+30;
-    18*3600, 273.15+30;
-    18*3600, 273.15+20],
+    0, 273.15+14;
+    3, 273.15+14;
+    3, 273.15+0;
+    6, 273.15+0;
+    6, 273.15+20;
+    12, 273.15+20;
+    12, 273.15+30;
+    18, 273.15+30;
+    18, 273.15+20],
+    timeScale=3600,
     extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
     y(each displayUnit="degC", each unit="K"))
     "Outdoor temperature"
@@ -112,7 +113,7 @@ equation
           {-69,50}}, color={0,0,127}));
   connect(TOut.y[1], pla.TSink) annotation (Line(points={{-71,-10},{-62,-10},{-62,
           -6},{-52,-6}}, color={0,0,127}));
-  annotation(experiment(StopTime=259200),
+  annotation(experiment(Tolerance=1e-6, StopTime=259200),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Experimental/DistrictHeatingCooling/Plants/Validation/Plant_Carnot_T_ClosedLoop.mos"
         "Simulate and plot"),
     Documentation(
@@ -133,7 +134,5 @@ January 11, 2015, by Michael Wetter:<br/>
 First implementation.
 </li>
 </ul>
-</html>"),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
-            100}})));
+</html>"));
 end Plant_Carnot_T_ClosedLoop;

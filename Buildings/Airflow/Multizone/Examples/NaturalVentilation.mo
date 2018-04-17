@@ -47,7 +47,7 @@ model NaturalVentilation
     m_flow_nominal=0.001)
     annotation (Placement(transformation(extent={{53,-20},{73,0}})));
 
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHeaFlo
     annotation (Placement(transformation(extent={{-49,-20},{-29,0}})));
   Modelica.Blocks.Sources.Step q_flow(
     height=-100,
@@ -81,7 +81,7 @@ equation
   annotation (
     Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,-100},{200,
             100}})),
-experiment(StopTime=7200),
+experiment(Tolerance=1e-06, StopTime=7200),
     __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Airflow/Multizone/Examples/NaturalVentilation.mos"
         "Simulate and plot"),
     Documentation(info="<html>

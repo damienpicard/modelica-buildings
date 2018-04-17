@@ -64,16 +64,18 @@ model HeatingCoolingHotWaterSmall
     annotation (Placement(transformation(extent={{-52,-70},{-72,-50}})));
   SubStations.VaporCompression.HeatingCoolingHotwaterTimeSeries_dT larOff(
       redeclare package Medium = Medium,
-      filNam="modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/SubStations/VaporCompression/RefBldgLargeOfficeNew2004_7.1_5.0_3C_USA_CA_SAN_FRANCISCO.mos",
+      filNam=Modelica.Utilities.Files.loadResource(
+        "modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/SubStations/VaporCompression/RefBldgLargeOfficeNew2004_7.1_5.0_3C_USA_CA_SAN_FRANCISCO.mos"),
     TOut_nominal=273.15) "Large office"
     annotation (Placement(transformation(extent={{-18,-20},{22,20}})));
   Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam=
-        "modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos",
+        Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_CA_San.Francisco.Intl.AP.724940_TMY3.mos"),
       computeWetBulbTemperature=false) "File reader that reads weather data"
     annotation (Placement(transformation(extent={{-200,100},{-180,120}})));
   SubStations.VaporCompression.HeatingCoolingHotwaterTimeSeries_dT ret(
     redeclare package Medium = Medium,
-    filNam="modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/SubStations/VaporCompression/RefBldgStand-aloneRetailNew2004_7.1_5.0_3C_USA_CA_SAN_FRANCISCO.mos",
+    filNam=Modelica.Utilities.Files.loadResource(
+      "modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/SubStations/VaporCompression/RefBldgStand-aloneRetailNew2004_7.1_5.0_3C_USA_CA_SAN_FRANCISCO.mos"),
     TOut_nominal=273.15) "Retail"
     annotation (Placement(transformation(extent={{80,-20},{120,20}})));
 
@@ -87,7 +89,7 @@ model HeatingCoolingHotWaterSmall
         transformation(extent={{-168,100},{-152,116}}), iconTransformation(
           extent={{-328,64},{-308,84}})));
 
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splSup(
+  Buildings.Fluid.FixedResistances.Junction splSup(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -95,7 +97,7 @@ model HeatingCoolingHotWaterSmall
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{-40,50},{-20,70}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM splRet(
+  Buildings.Fluid.FixedResistances.Junction splRet(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal*{1,1,1},
     dp_nominal=40*R_nominal*{0,1,1},
@@ -103,6 +105,18 @@ model HeatingCoolingHotWaterSmall
     tau=5*60,
     from_dp=false) "Flow splitter"
     annotation (Placement(transformation(extent={{30,-50},{50,-70}})));
+
+  Modelica.Blocks.Sources.CombiTimeTable watTem(
+    tableOnFile=true,
+    tableName="tab1",
+    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
+    smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
+    y(each unit="K"),
+    fileName=Modelica.Utilities.Files.loadResource(
+      "modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/Plants/AlamedaOceanT.mos"))
+    "Temperature of the water reservoir (such as a river, lake or ocean)"
+    annotation (Placement(transformation(extent={{-170,8},{-150,28}})));
+
 protected
   Modelica.Blocks.Sources.Constant TSetC(k=TSetCooLea)
     "Set point temperature for leaving water"
@@ -110,17 +124,7 @@ protected
   Modelica.Blocks.Sources.Constant TSetH(k=TSetHeaLea)
     "Set point temperature for leaving water"
     annotation (Placement(transformation(extent={{-260,100},{-240,120}})));
-public
-  Modelica.Blocks.Sources.CombiTimeTable watTem(
-    tableOnFile=true,
-    tableName="tab1",
-    extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
-    smoothness=Modelica.Blocks.Types.Smoothness.ContinuousDerivative,
-    y(unit="K"),
-    fileName=Buildings.BoundaryConditions.WeatherData.BaseClasses.getAbsolutePath(
-      "modelica://Buildings/Resources/Data/Experimental/DistrictHeatingCooling/Plants/AlamedaOceanT.mos"))
-    "Temperature of the water reservoir (such as a river, lake or ocean)"
-    annotation (Placement(transformation(extent={{-170,8},{-150,28}})));
+
 equation
   connect(pip.port_b, splSup.port_1) annotation (Line(points={{-50,60},{-50,60},
           {-40,60}},      color={0,127,255}));
@@ -175,7 +179,7 @@ equation
           {-232,70},{-239,70},{-239,70}}, color={0,0,127}));
   connect(bayWatHex.TSouCoo, weaBus.TDryBul) annotation (Line(points={{-122,10},
           {-130,10},{-130,108},{-160,108}}, color={0,0,127}));
-  annotation(experiment(Tolerance=1E-6, StopTime=31536000),
+  annotation(experiment(Tolerance=1e-06, StopTime=31536000),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Experimental/DistrictHeatingCooling/Validation/HeatingCoolingHotWaterSmall.mos"
         "Simulate and plot"),
     Documentation(
@@ -189,6 +193,16 @@ are prescribed by time series.
 revisions="<html>
 <ul>
 <li>
+December 12, 2017, by Michael Wetter:<br/>
+Added <code>Modelica.Utilities.Files.loadResource</code>.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/1097\">issue 1097</a>.
+</li>
+<li>
+November 8, 2016, by Michael Wetter:<br/>
+Added missing <code>each</code> keyword to output of combi time table.
+</li>
+<li>
 June 2, 2016, by Michael Wetter:<br/>
 Changed pressure drops and removed top-level parameter <code>dp_nominal</code>.
 </li>
@@ -199,6 +213,5 @@ First implementation.
 </ul>
 </html>"),
     Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-280,-120},{
-            140,140}})),
-    Icon(coordinateSystem(extent={{-100,-100},{100,100}})));
+            140,140}})));
 end HeatingCoolingHotWaterSmall;

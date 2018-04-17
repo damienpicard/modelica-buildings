@@ -2,8 +2,7 @@ within Buildings.Electrical.AC.ThreePhasesUnbalanced.Validation.IEEETests.Test4N
 model YY
   "IEEE 4 node test feeder model with unbalanced load and Y - Y connection (step down)"
   extends
-    Buildings.Electrical.AC.ThreePhasesUnbalanced.Validation.IEEETests.Test4NodesFeeder.BaseClasses.IEEE4
-    (
+    Buildings.Electrical.AC.ThreePhasesUnbalanced.Validation.IEEETests.Test4NodesFeeder.BaseClasses.IEEE4(
     final line1_use_Z_y=true,
     final line2_use_Z_y=true,
     redeclare Buildings.Electrical.AC.ThreePhasesUnbalanced.Sensors.ProbeWye
@@ -23,7 +22,13 @@ model YY
     final Theta2_ref=Modelica.Constants.pi/180.0*{-0.1,-120.2,119.3},
     final Theta3_ref=Modelica.Constants.pi/180.0*{-2.3,-123.6,114.8},
     final Theta4_ref=Modelica.Constants.pi/180.0*{-4.1,-126.8,102.8},
-    loadRL(use_pf_in=true));
+    loadRL(use_pf_in=true),
+    line1(i1(start={180, -130}),
+          i2(start={-300, -160}),
+          i3(start={40, 450})),
+    line2(i2(start={-900, -480}),
+          i3(start={130, 1400})));
+
   Modelica.Blocks.Sources.Constant load1(k=-1275e3)
     annotation (Placement(transformation(extent={{54,30},{74,50}})));
   Modelica.Blocks.Sources.Constant load2(k=-1800e3)
@@ -93,11 +98,18 @@ equation
       points={{38,29},{38,10},{54,10}},
       color={0,120,120},
       smooth=Smooth.None));
-  annotation (experiment(StopTime=1.0, Tolerance=1e-06),
+  annotation (experiment(StopTime=1.0, Tolerance=1e-6),
   __Dymola_Commands(file=
           "modelica://Buildings/Resources/Scripts/Dymola/Electrical/AC/ThreePhasesUnbalanced/Validation/IEEETests/Test4NodesFeeder/UnbalancedStepDown/YY.mos"
         "Simulate and plot"),
- Documentation(revisions="<html><ul>
+ Documentation(revisions="<html>
+<ul>
+<li>
+November 28, 2016, by Michael Wetter:<br/>
+Set start values.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/584\">#584</a>.
+</li>
 <li>
 October 9, 2014, by Marco Bonvini:<br/>
 Added documentation.

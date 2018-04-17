@@ -139,7 +139,7 @@ model StratifiedEnhancedInternalHex
         origin={-87,32})));
 
   Modelica.SIunits.HeatFlowRate QHex_flow = -sum(indTanHex.port.Q_flow)
-    "Heat transfered from the heat exchanger to the tank";
+    "Heat transferred from the heat exchanger to the tank";
 protected
   final parameter Integer segHex_a = nSeg-integer(hHex_a/segHeight)
     "Tank segment in which port a1 of the heat exchanger is located in"
@@ -176,15 +176,15 @@ initial equation
   assert(dHHex > 0,
     "The parameters hHex_a and hHex_b must not be equal.");
 equation
-   for j in 1:nSegHexTan loop
-     for i in 1:hexSegMult loop
-       connect(indTanHex.port[(j-1)*hexSegMult+i], heaPorVol[segHex_a+j-1])
+  for j in 0:nSegHexTan-1 loop
+    for i in 1:hexSegMult loop
+      connect(indTanHex.port[j*hexSegMult+i], heaPorVol[segHex_a + (if hHex_a > hHex_b then j else -j)])
         annotation (Line(
        points={{-87,41.8},{-20,41.8},{-20,-2.22045e-16},{0,-2.22045e-16}},
        color={191,0,0},
        smooth=Smooth.None));
-     end for;
-   end for;
+    end for;
+  end for;
   connect(portHex_a, indTanHex.port_a) annotation (Line(
       points={{-100,-38},{-68,-38},{-68,32},{-77,32}},
       color={0,127,255},
@@ -194,7 +194,7 @@ equation
       color={0,127,255},
       smooth=Smooth.None));
 
-           annotation (Line(
+  annotation (Line(
       points={{-73.2,69},{-70,69},{-70,28},{-16,28},{-16,-2.22045e-16},{0,-2.22045e-16}},
       color={191,0,0},
       smooth=Smooth.None), Icon(coordinateSystem(preserveAspectRatio=false,
@@ -253,10 +253,18 @@ The model requires at least 4 fluid segments. Hence, set <code>nSeg</code> to 4 
 revisions="<html>
 <ul>
 <li>
+June 23, 2016, by Michael Wetter:<br/>
+Corrected computation of the heat exchanger location which was wrong
+if <code>hHex_a &lt; hHex_b</code>, e.g., the port a of the heat exchanger
+is below the port b.
+This closes
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/531\">issue 531</a>.
+</li>
+<li>
 January 22, 2016, by Michael Wetter:<br/>
 Corrected type declaration of pressure difference.
 This is
-for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/404\">#404</a>.
 </li>
 <li>
 July 2, 2015, by Michael Wetter:<br/>

@@ -57,7 +57,7 @@ protected
     final h=h,
     final lat=lat,
     final azi=azi,
-    final filNam="",
+    final filNam=filNam,
     final lon=lon,
     final timZon=timZon) "Projected length of shadow"
     annotation (Placement(transformation(extent={{-60,-30},{-40,-10}})));
@@ -145,6 +145,10 @@ The wall is vertical.
 </html>", revisions="<html>
 <ul>
 <li>
+August 23, 2016, by Thierry S. Nouidui:<br/>
+Propagated <code>filNam</code>.
+</li>
+<li>
 April 21, 2016, by Michael Wetter:<br/>
 Introduced <code>absFilNam</code> to avoid multiple calls to
 <a href=\"modelica://Buildings.BoundaryConditions.WeatherData.BaseClasses.getAbsolutePath\">
@@ -166,7 +170,5 @@ First implementation.
 </ul>
 </html>"),
     Icon(graphics={Bitmap(extent={{-88,90},{96,-94}},
-            fileName="modelica://Buildings/Resources/Images/HeatTransfer/Windows/BeamDepthInRoomIcon.png")}),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{100,
-            100}})));
+            fileName="modelica://Buildings/Resources/Images/HeatTransfer/Windows/BeamDepthInRoomIcon.png")}));
 end BeamDepthInRoom;

@@ -4,9 +4,9 @@ model ConservationEquation "Lumped volume with mass and energy balance"
   extends Buildings.Fluid.Interfaces.LumpedVolumeDeclarations;
 
   // Constants
-  constant Boolean initialize_p = not Medium.singleState
+  parameter Boolean initialize_p = not Medium.singleState
     "= true to set up initial equations for pressure"
-    annotation(HideResult=true);
+    annotation(HideResult=true, Evaluate=true, Dialog(tab="Advanced"));
 
   constant Boolean simplify_mWat_flow = true
     "Set to true to cause port_a.m_flow + port_b.m_flow = 0 even if mWat_flow is non-zero";
@@ -55,22 +55,18 @@ model ConservationEquation "Lumped volume with mass and energy balance"
   Modelica.Blocks.Interfaces.RealOutput UOut(unit="J")
     "Internal energy of the component" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
-        rotation=0,
         origin={110,20})));
   Modelica.Blocks.Interfaces.RealOutput mXiOut[Medium.nXi](each min=0, each unit=
        "kg") "Species mass of the component"
     annotation (Placement(transformation(extent={{-10,-10},{10,10}},
-        rotation=0,
         origin={110,-20})));
   Modelica.Blocks.Interfaces.RealOutput mOut(min=0, unit="kg")
     "Mass of the component" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
-        rotation=0,
         origin={110,60})));
   Modelica.Blocks.Interfaces.RealOutput mCOut[Medium.nC](each min=0, each unit="kg")
     "Trace substance mass of the component"
     annotation (Placement(transformation(extent={{-10,-10},{10,10}},
-        rotation=0,
         origin={110,-60})));
 
   Modelica.Fluid.Vessels.BaseClasses.VesselFluidPorts_b ports[nPorts](
@@ -92,11 +88,21 @@ model ConservationEquation "Lumped volume with mass and energy balance"
      T=T_start,
      p=p_start,
      X=X_start[1:Medium.nXi])) +
-    (T_start - Medium.reference_T)*CSen) "Internal energy of fluid";
-  Modelica.SIunits.Mass m "Mass of fluid";
-  Modelica.SIunits.Mass[Medium.nXi] mXi
+    (T_start - Medium.reference_T)*CSen,
+    nominal = 1E5) "Internal energy of fluid";
+
+  Modelica.SIunits.Mass m(
+    start=fluidVolume*rho_start,
+    stateSelect=if massDynamics == Modelica.Fluid.Types.Dynamics.SteadyState
+    then StateSelect.default else StateSelect.prefer)
+    "Mass of fluid";
+
+  Modelica.SIunits.Mass[Medium.nXi] mXi(
+    start=fluidVolume*rho_start*X_start[1:Medium.nXi])
     "Masses of independent components in the fluid";
-  Modelica.SIunits.Mass[Medium.nC] mC "Masses of trace substances in the fluid";
+  Modelica.SIunits.Mass[Medium.nC] mC(
+    start=fluidVolume*rho_start*C_start)
+    "Masses of trace substances in the fluid";
   // C need to be added here because unlike for Xi, which has medium.Xi,
   // there is no variable medium.C
   Medium.ExtraProperty C[Medium.nC](nominal=C_nominal)
@@ -230,9 +236,9 @@ equation
       // If moisture is neglected in mass balance, assume for computation
       // of the mass of air that the air is at Medium.X_default.
       m = fluidVolume*Medium.density(Medium.setState_phX(
-        p=  medium.p,
-        h=  hOut,
-        X=  Medium.X_default));
+        p = medium.p,
+        h = hOut,
+        X = Medium.X_default));
     else
       // Use actual density
       m = fluidVolume*medium.d;
@@ -253,7 +259,7 @@ equation
   for i in 1:nPorts loop
     //The semiLinear function should be used for the equations below
     //for allowing min/max simplifications.
-    //See https://github.com/iea-annex60/modelica-annex60/issues/216 for a discussion and motivation
+    //See https://github.com/ibpsa/modelica-ibpsa/issues/216 for a discussion and motivation
     ports_H_flow[i]     = semiLinear(ports[i].m_flow, inStream(ports[i].h_outflow), ports[i].h_outflow)
       "Enthalpy flow";
     for j in 1:Medium.nXi loop
@@ -328,7 +334,7 @@ This allows to decouple the moisture balance from the pressure drop equations.
 If <code>simplify_mWat_flow = false</code>, then
 the outlet mass flow rate is
 <i>m<sub>out</sub> = m<sub>in</sub>  (1 + &Delta; X<sub>w</sub>)</i>,
-where 
+where
 <i>&Delta; X<sub>w</sub></i> is the change in water vapor mass
 fraction across the component. In this case,
 this component couples
@@ -367,6 +373,12 @@ is simplified as
 This causes an error in the mass balance of about <i>0.5%</i>, but generally leads to
 simpler equations because the pressure drop equations are then decoupled from the
 mass exchange in this component.
+The model
+<a href=\"modelica://Buildings.Fluid.MixingVolumes.Validation.MixingVolumeAdiabaticCooling\">
+Buildings.Fluid.MixingVolumes.Validation.MixingVolumeAdiabaticCooling</a>
+shows that the relative error on the temperature difference between these
+two options of <code>simplify_mWat_flow</code> is less than
+<i>0.1%</i>.
 </p>
 
 <h4>Implementation</h4>
@@ -405,10 +417,32 @@ Buildings.Fluid.MixingVolumes.MixingVolume</a>.
 </html>", revisions="<html>
 <ul>
 <li>
+November 3, 2017, by Michael Wetter:<br/>
+Set <code>start</code> attributes.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/727\">727</a>.
+</li>
+<li>
+October 19, 2017, by Michael Wetter:<br/>
+Changed initialization of pressure from a <code>constant</code> to a <code>parameter</code>.<br/>
+This is for
+<a href=\"https://github.com/lbl-srg/modelica-buildings/issues/1013\">Buildings, issue 1013</a>.
+</li>
+<li>
+January 27, 2017, by Michael Wetter:<br/>
+Added <code>stateSelect</code> for mass <code>m</code>.<br/>
+This is for <a href=\"https://github.com/lbl-srg/modelica-buildings/issues/642\">
+Buildings, #642</a>.
+</li>
+<li>
+December 22, 2016, by Michael Wetter:<br/>
+Set nominal value for <code>U</code>.<br/>
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/637\">637</a>.
+</li>
+<li>
 February 19, 2016 by Filip Jorissen:<br/>
 Added outputs UOut, mOut, mXiOut, mCOut for being able to
-check conservation of quantities. 
-This if or <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/247\">
+check conservation of quantities.
+This is for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/247\">
 issue 247</a>.
 </li>
 <li>
@@ -416,7 +450,7 @@ January 17, 2016, by Michael Wetter:<br/>
 Added parameter <code>use_C_flow</code> and converted <code>C_flow</code>
 to a conditionally removed connector.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/372\">#372</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/372\">#372</a>.
 </li>
 <li>
 December 16, 2015, by Michael Wetter:<br/>
@@ -429,11 +463,11 @@ Added input <code>C_flow</code> and code for handling trace substance insertions
 </li>
 <li>
 September 3, 2015, by Filip Jorissen and Michael Wetter:<br/>
-Revised implementation for allowing moisture mass flow rate 
-to be approximated using parameter <code>simplify_mWat_flow</code>. 
+Revised implementation for allowing moisture mass flow rate
+to be approximated using parameter <code>simplify_mWat_flow</code>.
 This may lead to smaller algebraic loops.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/247\">#247</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/247\">#247</a>.
 </li>
 <li>
 July 17, 2015, by Michael Wetter:<br/>
@@ -446,7 +480,7 @@ Removed <code>preferredMediumStates= false</code> in
 the instance <code>medium</code> as the default
 is already <code>false</code>.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/260\">#260</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/260\">#260</a>.
 </li>
 <li>
 June 5, 2015 by Filip Jorissen:<br/>
@@ -460,7 +494,7 @@ and set
 because the previous declaration led to more equations and
 translation problems in large models.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/260\">#260</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/260\">#260</a>.
 </li>
 <li>
 June 5, 2015, by Michael Wetter:<br/>
@@ -469,7 +503,7 @@ from instance <code>dynBal</code> of <code>PartialMixingVolume</code>
 to this model implementation.
 This is required for a pedantic model check in Dymola 2016.
 It addresses
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/266\">
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/266\">
 issue 266</a>.
 This revison also renames the protected variable
 <code>rho_nominal</code> to <code>rho_start</code>
@@ -488,7 +522,7 @@ The model requires derivatives of some inputs as listed below:
 1 inlet.p
 </pre>
 when translating
-<code>Buildings.Fluid.FMI.Examples.FMU.HeaterCooler_u</code>
+<code>Buildings.Fluid.FMI.ExportContainers.Examples.FMUs.HeaterCooler_u</code>
 with a dynamic energy balance.
 </li>
 <li>
@@ -517,9 +551,10 @@ and hence it should be set as a <code>constant</code>.
 February 3, 2015, by Michael Wetter:<br/>
 Removed <code>stateSelect.prefer</code> for temperature.
 This is for
-<a href=\"https://github.com/iea-annex60/modelica-annex60/issues/160\">#160</a>.
+<a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/160\">#160</a>.
 </li>
-<li>October 21, 2014, by Filip Jorissen:<br/>
+<li>
+October 21, 2014, by Filip Jorissen:<br/>
 Added parameter <code>mFactor</code> to increase the thermal capacity.
 </li>
 <li>
@@ -557,7 +592,8 @@ Improved documentation for <code>Q_flow</code> input.
 September 17, 2013 by Michael Wetter:<br/>
 Added start value for <code>hOut</code>.
 </li>
-<li>September 10, 2013 by Michael Wetter:<br/>
+<li>
+September 10, 2013 by Michael Wetter:<br/>
 Removed unrequired parameter <code>i_w</code>.<br/>
 Corrected the syntax error
 <code>Medium.ExtraProperty C[Medium.nC](each nominal=C_nominal)</code>
@@ -595,6 +631,7 @@ Also removed the reference to <code>Modelica.Fluid.System</code>.
 Moved parameters and medium to
 <a href=\"Buildings.Fluid.Interfaces.LumpedVolumeDeclarations\">
 Buildings.Fluid.Interfaces.LumpedVolumeDeclarations</a>.
+</li>
 <li>
 July 14, 2011 by Michael Wetter:<br/>
 Added start value for medium density.
@@ -608,6 +645,7 @@ to <code>massDynamics</code>.
 <li>
 September 28, 2010 by Michael Wetter:<br/>
 Changed array index for nominal value of <code>Xi</code>.
+</li>
 <li>
 September 13, 2010 by Michael Wetter:<br/>
 Set nominal attributes for medium based on default medium values.
@@ -667,7 +705,5 @@ Implemented first version in <code>Buildings</code> library, based on model from
         Text(
           extent={{-155,-120},{145,-160}},
           lineColor={0,0,255},
-          textString="%name")}),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{
-            100,100}})));
+          textString="%name")}));
 end ConservationEquation;

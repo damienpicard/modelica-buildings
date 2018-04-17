@@ -17,13 +17,13 @@ model LakeWaterHeatExchanger_T_Heating
   Modelica.Blocks.Sources.Constant TSetC(k=273.15 + 8)
     "Set point temperature for leaving water"
     annotation (Placement(transformation(extent={{-80,-80},{-60,-60}})));
-  Fluid.Sources.Boundary_pT bou(
+  Buildings.Fluid.Sources.Boundary_pT bou(
     redeclare package Medium = Medium,
     nPorts=1,
     use_T_in=true,
     T=277.15) "Boundary condition"
     annotation (Placement(transformation(extent={{52,-10},{32,10}})));
-  Fluid.Sources.MassFlowSource_T floSou(
+  Buildings.Fluid.Sources.MassFlowSource_T floSou(
     redeclare package Medium = Medium,
     use_T_in=true,
     use_m_flow_in=true,
@@ -44,12 +44,12 @@ model LakeWaterHeatExchanger_T_Heating
     startTime=1800 + 900) "Mass flow rate"
     annotation (Placement(transformation(extent={{90,-30},{70,-10}})));
 
-  Fluid.Sensors.TemperatureTwoPort temWar(
+  Buildings.Fluid.Sensors.TemperatureTwoPort temWar(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal,
     tau=0) "Warm water supply leg temperature"
     annotation (Placement(transformation(extent={{0,-10},{20,10}})));
-  Fluid.Sensors.TemperatureTwoPort temCol(
+  Buildings.Fluid.Sensors.TemperatureTwoPort temCol(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal,
     tau=0) "Cold water supply leg temperature"
@@ -59,7 +59,7 @@ model LakeWaterHeatExchanger_T_Heating
     constrainedby Modelica.Blocks.Interfaces.SO "Water temperature"
     annotation (Placement(transformation(extent={{90,12},{70,32}})));
 
-  Modelica.Blocks.Sources.Constant TWatSou(k=275.15 + 15)
+  Modelica.Blocks.Sources.Constant TWatSou(k=273.15 + 15)
     "Ocean water temperature"
     annotation (Placement(transformation(extent={{-80,70},{-60,90}})));
   Modelica.Blocks.Sources.Constant
@@ -99,9 +99,7 @@ equation
           -44,14},{-32,14}}, color={0,0,127}));
   connect(TSouCoo.y, hex.TSouCoo) annotation (Line(points={{-59,20},{-48,20},{
           -48,10},{-32,10}}, color={0,0,127}));
-  annotation (Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,
-            -100},{100,100}})),
-    experiment(StopTime=3600),
+  annotation (    experiment(Tolerance=1e-6, StopTime=3600),
     __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Experimental/DistrictHeatingCooling/Plants/Validation/LakeWaterHeatExchanger_T_Heating.mos"
         "Simulate and plot"),
     Documentation(info="<html>
@@ -113,6 +111,10 @@ reverses its direction.
 </p>
 </html>", revisions="<html>
 <ul>
+<li>
+February 2, 2017, by Felix Buenning:<br/>
+Corrected offset for temperature from <i>275.15</i> to <i>273.15</i> in <code>TWatSou</code>.
+</li>
 <li>
 January 11, 2015, by Michael Wetter:<br/>
 First implementation.

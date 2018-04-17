@@ -1,7 +1,7 @@
 within Buildings.HeatTransfer.Windows.Examples;
 model Overhang "This example tests the window overhang model"
   extends Modelica.Icons.Example;
-  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam="modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
+  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos"))
     "Weather data"
     annotation (Placement(transformation(extent={{-60,0},{-40,20}})));
   Buildings.HeatTransfer.Windows.Overhang ove(
@@ -38,7 +38,7 @@ equation
       points={{1,30},{10,30},{10,16},{18,16}},
       color={0,0,127},
       smooth=Smooth.None));
- annotation (experiment(StopTime=86400),
+ annotation (experiment(Tolerance=1e-6, StopTime=86400),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/HeatTransfer/Windows/Examples/Overhang.mos"
         "Simulate and plot"),
 Documentation(info="<html>

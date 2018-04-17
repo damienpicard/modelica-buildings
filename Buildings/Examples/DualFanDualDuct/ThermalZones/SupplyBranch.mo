@@ -36,26 +36,22 @@ model SupplyBranch "Supply branch of a dual duct system"
             -110,-50},{-90,-30}}), iconTransformation(extent={{-110,-38},{-90,-18}})));
   Buildings.Fluid.Actuators.Dampers.VAVBoxExponential vavHot(
     redeclare package Medium = MediumA,
-    A=0.6,
-    use_v_nominal=true,
     m_flow_nominal=mAirHot_flow_nominal,
     dp_nominal(displayUnit="Pa") = 40,
     from_dp=from_dp,
-    linearized=linearizeFlowResistance) "VAV damper for hot deck"
-                                                                annotation (
+    linearized=linearizeFlowResistance,
+    y_start=0)                          "VAV damper for hot deck" annotation (
       Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={0,-30})));
   Buildings.Fluid.Actuators.Dampers.VAVBoxExponential vavCol(
     redeclare package Medium = MediumA,
-    A=0.6,
-    use_v_nominal=true,
     m_flow_nominal=mAirCol_flow_nominal,
     dp_nominal(displayUnit="Pa") = 40,
     from_dp=from_dp,
-    linearized=linearizeFlowResistance) "VAV damper for cold deck"
-                                                                annotation (
+    linearized=linearizeFlowResistance,
+    y_start=0)                          "VAV damper for cold deck" annotation (
       Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
@@ -74,7 +70,7 @@ model SupplyBranch "Supply branch of a dual duct system"
     annotation (Placement(transformation(extent={{100,94},{120,114}})));
   Modelica.Blocks.Interfaces.RealInput TRoo "Measured room temperature"
     annotation (Placement(transformation(extent={{-140,80},{-100,120}})));
-  Fluid.FixedResistances.SplitterFixedResistanceDpM mix(
+  Buildings.Fluid.FixedResistances.Junction mix(
     redeclare package Medium = MediumA,
     m_flow_nominal={mAirCol_flow_nominal,mAirHot_flow_nominal,
         mAirCol_flow_nominal + mAirHot_flow_nominal},
@@ -87,13 +83,13 @@ model SupplyBranch "Supply branch of a dual duct system"
         rotation=180,
         origin={50,40})));
 
-  Fluid.Sensors.RelativePressure senRelPreHot(redeclare package Medium =
+  Buildings.Fluid.Sensors.RelativePressure senRelPreHot(redeclare package Medium =
         MediumA) "Relative pressure hot deck (compared to room pressure)"
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={150,0})));
-  Fluid.Sensors.RelativePressure senRelPreCol(redeclare package Medium =
+  Buildings.Fluid.Sensors.RelativePressure senRelPreCol(redeclare package Medium =
         MediumA) "Relative pressure cold deck (compared to room pressure)"
     annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
@@ -103,12 +99,16 @@ model SupplyBranch "Supply branch of a dual duct system"
     annotation (Placement(transformation(extent={{200,-70},{220,-50}})));
   Modelica.Blocks.Interfaces.RealOutput p_relHot "Pressure signal of hot deck"
     annotation (Placement(transformation(extent={{200,-10},{220,10}})));
-  Fluid.Sensors.TemperatureTwoPort TSup(redeclare package Medium = MediumA,
+  Buildings.Fluid.Sensors.TemperatureTwoPort TSup(redeclare package Medium = MediumA,
       m_flow_nominal=m_flow_nominal) "Supply air temperature" annotation (
       Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={50,168})));
+  Buildings.Controls.OBC.CDL.Interfaces.BooleanInput yFan
+    "Fan operation, true if fan is running" annotation (Placement(
+        transformation(extent={{-140,-20},{-100,20}}), iconTransformation(
+          extent={{-140,0},{-100,40}})));
 equation
   connect(fraMasFlo.u, senMasFlo.m_flow) annotation (Line(
       points={{100,144},{80,144},{80,134},{61,134}},
@@ -140,7 +140,7 @@ equation
       color={0,127,255},
       smooth=Smooth.None));
   connect(senMasFlo.m_flow, con.mAir_flow) annotation (Line(
-      points={{61,134},{66,134},{66,70},{-52,70},{-52,4},{-42,4}},
+      points={{61,134},{66,134},{66,70},{-52,70},{-52,6},{-42,6}},
       color={0,0,127},
       smooth=Smooth.None));
   connect(con.yHot, vavHot.y) annotation (Line(
@@ -201,6 +201,8 @@ equation
       points={{50,178},{50,200}},
       color={0,127,255},
       smooth=Smooth.None));
+  connect(con.yFan, yFan) annotation (Line(points={{-42,2},{-82,2},{-82,0},{
+          -120,0}}, color={255,0,255}));
   annotation (Diagram(coordinateSystem(preserveAspectRatio=true, extent={{-100,
             -100},{200,200}})), Icon(coordinateSystem(
           preserveAspectRatio=true, extent={{-100,-100},{200,200}}), graphics={

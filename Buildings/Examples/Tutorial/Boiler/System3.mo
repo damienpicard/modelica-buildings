@@ -43,7 +43,7 @@ model System3
     "Thermal conductance with the ambient"
     annotation (Placement(transformation(extent={{20,40},{40,60}})));
   parameter Modelica.SIunits.Volume V=6*10*3 "Room volume";
-  parameter Modelica.SIunits.MassFlowRate mA_flow_nominal = V*6/3600
+  parameter Modelica.SIunits.MassFlowRate mA_flow_nominal = V*1.2*6/3600
     "Nominal mass flow rate";
   parameter Modelica.SIunits.HeatFlowRate QRooInt_flow = 4000
     "Internal heat gains of the room";
@@ -59,9 +59,10 @@ model System3
   Modelica.Blocks.Sources.CombiTimeTable timTab(
       extrapolation=Modelica.Blocks.Types.Extrapolation.Periodic,
       smoothness=Modelica.Blocks.Types.Smoothness.ConstantSegments,
-      table=[-6*3600, 0;
-              8*3600, QRooInt_flow;
-             18*3600, 0]) "Time table for internal heat gain"
+      table=[-6, 0;
+              8, QRooInt_flow;
+             18, 0],
+      timeScale=3600) "Time table for internal heat gain"
     annotation (Placement(transformation(extent={{-20,70},{0,90}})));
   Buildings.Fluid.HeatExchangers.Radiators.RadiatorEN442_2 rad(
     redeclare package Medium = MediumW,
@@ -90,54 +91,51 @@ model System3
       origin={-50,-70})));
 
 //-------------------------Step 3: Splitter and mixers------------------------//
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM mix(
-    redeclare package Medium =MediumW,
+  Buildings.Fluid.FixedResistances.Junction mix(
+    redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
-    m_flow_nominal={mRadVal_flow_nominal,
-                   -mRad_flow_nominal,
-                   mRad_flow_nominal-mRadVal_flow_nominal},
+    m_flow_nominal={mRadVal_flow_nominal,-mRad_flow_nominal,mRad_flow_nominal
+         - mRadVal_flow_nominal},
     dp_nominal={100,-8000,6750}) "Mixer between valve and radiators"
-                        annotation (Placement(transformation(
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={-50,-110})));
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM spl(
+  Buildings.Fluid.FixedResistances.Junction spl(
     redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
-    m_flow_nominal={mBoi_flow_nominal,
-                   -mRadVal_flow_nominal,
-                   -mBoi_flow_nominal},
-    dp_nominal={200,-200,-50}) "Splitter of boiler loop bypass"
-                        annotation (Placement(transformation(
+    m_flow_nominal={mBoi_flow_nominal,-mRadVal_flow_nominal,-mBoi_flow_nominal},
+
+    dp_nominal={200,-200,-50}) "Splitter of boiler loop bypass" annotation (
+      Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={-50,-190})));
 
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM spl2(redeclare
-      package Medium=MediumW,
+  Buildings.Fluid.FixedResistances.Junction spl2(
+    redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     dp_nominal={0,0,0},
-    m_flow_nominal={mRad_flow_nominal,-mRadVal_flow_nominal,-mRad_flow_nominal +
-        mRadVal_flow_nominal})
-                        annotation (Placement(transformation(
+    m_flow_nominal={mRad_flow_nominal,-mRadVal_flow_nominal,-mRad_flow_nominal
+         + mRadVal_flow_nominal}) annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={60,-110})));
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM mix2(redeclare
-      package Medium=MediumW,
+  Buildings.Fluid.FixedResistances.Junction mix2(
+    redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     dp_nominal={0,-200,0},
-    m_flow_nominal={mRadVal_flow_nominal,-mBoi_flow_nominal,mBoi_flow_nominal}) "Mixer"
-                        annotation (Placement(transformation(
+    m_flow_nominal={mRadVal_flow_nominal,-mBoi_flow_nominal,mBoi_flow_nominal})
+    "Mixer" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={60,-190})));
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM spl4(redeclare
-      package Medium=MediumW,
+  Buildings.Fluid.FixedResistances.Junction spl4(
+    redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal=mRadVal_flow_nominal*{1,-1,-1},
     dp_nominal=200*{1,-1,-1}) "Splitter for radiator loop valve bypass"
-                        annotation (Placement(transformation(
+    annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={60,-150})));
@@ -196,12 +194,11 @@ model System3
         extent={{-10,-10},{10,10}},
         rotation=270,
         origin={60,-280})));
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM spl1(redeclare
-      package Medium=MediumW,
+  Buildings.Fluid.FixedResistances.Junction spl1(
+    redeclare package Medium = MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal={mBoi_flow_nominal,-mBoi_flow_nominal,-mBoi_flow_nominal},
-    dp_nominal={0,0,-200}) "Splitter"
-                        annotation (Placement(transformation(
+    dp_nominal={0,0,-200}) "Splitter" annotation (Placement(transformation(
         extent={{-10,-10},{10,10}},
         rotation=90,
         origin={-50,-250})));
@@ -403,8 +400,8 @@ as these will be replaced by the boiler loop.
 <li>
 <p>
 We made various instances of
-<a href=\"modelica://Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM\">
-Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM</a>
+<a href=\"modelica://Buildings.Fluid.FixedResistances.Junction\">
+Buildings.Fluid.FixedResistances.Junction</a>
 to model flow splitter and mixers.
 We also made an instance of
 <a href=\"modelica://Buildings.Fluid.Actuators.Valves.ThreeWayEqualPercentageLinear\">
@@ -509,7 +506,7 @@ radiator loop, into the instance <code>mix</code>.
 Hence, its parameters are
 </p>
 <pre>
-  Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM mix(
+  Buildings.Fluid.FixedResistances.Junction mix(
     redeclare package Medium =MediumW,
     energyDynamics=Modelica.Fluid.Types.Dynamics.FixedInitial,
     m_flow_nominal={mRadVal_flow_nominal,
@@ -521,8 +518,8 @@ Hence, its parameters are
 Note the negative values, which are used for the ports where the medium is
 outflowing at nominal conditions.
 See also the documentation of the model
-<a href=\"modelica://Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM\">
-Buildings.Fluid.FixedResistances.SplitterFixedResistanceDpM</a>.
+<a href=\"modelica://Buildings.Fluid.FixedResistances.Junction\">
+Buildings.Fluid.FixedResistances.Junction</a>.
 </p>
 <p>
 We also set the pressure drop of
@@ -580,6 +577,11 @@ this indicates that the model is correct.
 </html>", revisions="<html>
 <ul>
 <li>
+March 6, 2017, by Michael Wetter:<br/>
+Added missing density to computation of air mass flow rate.<br/>
+This is for <a href=\"https://github.com/lbl-srg/modelica-buildings/issues/673\">#673</a>.
+</li>
+<li>
 December 22, 2014 by Michael Wetter:<br/>
 Removed <code>Modelica.Fluid.System</code>
 to address issue
@@ -601,5 +603,5 @@ First implementation.
     __Dymola_Commands(file=
      "modelica://Buildings/Resources/Scripts/Dymola/Examples/Tutorial/Boiler/System3.mos"
         "Simulate and plot"),
-    experiment(StopTime=172800));
+    experiment(Tolerance=1e-6, StopTime=172800));
 end System3;

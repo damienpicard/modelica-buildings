@@ -5,10 +5,10 @@ model MixingVolumeHeatReverseFlow
     Buildings.Fluid.MixingVolumes.Validation.BaseClasses.MixingVolumeReverseFlow(
       gain(k=10));
 
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHeaDyn
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHeaDyn
     "Prescribed heat flow rate"
     annotation (Placement(transformation(extent={{0,50},{20,70}})));
-  Buildings.HeatTransfer.Sources.PrescribedHeatFlow preHeaSte
+  Modelica.Thermal.HeatTransfer.Sources.PrescribedHeatFlow preHeaSte
     "Prescribed heat flow rate"
     annotation (Placement(transformation(extent={{0,30},{20,50}})));
 equation
@@ -41,7 +41,5 @@ First implementation.
 </html>"),
  __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/Fluid/MixingVolumes/Validation/MixingVolumeHeatReverseFlow.mos"
         "Simulate and plot"),
-    experiment(StopTime=10),
-    Diagram(coordinateSystem(preserveAspectRatio=false, extent={{-100,-100},{
-            100,100}})));
+    experiment(Tolerance=1e-08, StopTime=10));
 end MixingVolumeHeatReverseFlow;

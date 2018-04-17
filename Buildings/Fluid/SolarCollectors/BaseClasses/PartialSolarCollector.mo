@@ -68,7 +68,7 @@ model PartialSolarCollector "Partial model for solar collectors"
   Buildings.Fluid.Sensors.MassFlowRate senMasFlo(redeclare package Medium =
     Medium, allowFlowReversal=allowFlowReversal) "Mass flow rate sensor"
     annotation (Placement(transformation(extent={{-86,-11},{-66,11}})));
-  Buildings.Fluid.FixedResistances.FixedResistanceDpM res(
+  Buildings.Fluid.FixedResistances.PressureDrop res(
     redeclare final package Medium = Medium,
     final from_dp=from_dp,
     final show_T=show_T,
@@ -76,7 +76,6 @@ model PartialSolarCollector "Partial model for solar collectors"
     final allowFlowReversal=allowFlowReversal,
     final linearized=linearizeFlowResistance,
     final homotopyInitialization=homotopyInitialization,
-    use_dh=false,
     deltaM=deltaM,
     final dp_nominal=dp_nominal_final) "Flow resistance"
     annotation (Placement(transformation(extent={{-60,-10},{-40,10}})));
@@ -241,7 +240,7 @@ revisions="<html>
 January 22, 2016, by Michael Wetter:<br/>
 Corrected type declaration of pressure difference.
 This is
-for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/404\">#404</a>.
 </li>
 <li>
 February 8, 2015, by Filip Jorissen:<br/>

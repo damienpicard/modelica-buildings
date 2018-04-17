@@ -28,15 +28,12 @@ model PipeManifoldFixedResistance
     "= true, use m_flow = f(dp) else dp = f(m_flow)"
     annotation (Evaluate=true, Dialog(tab="Advanced"));
 
-  Fluid.FixedResistances.FixedResistanceDpM fixRes(
+  Buildings.Fluid.FixedResistances.PressureDrop fixRes(
     redeclare package Medium = Medium,
     m_flow_nominal=m_flow_nominal,
     dp_nominal=dp_nominal,
-    dh=dh,
     from_dp=from_dp,
     deltaM=deltaM,
-    ReC=ReC,
-    use_dh=use_dh,
     linearized=linearized) "Fixed resistance for each duct"
     annotation (Placement(transformation(extent={{-40,-10},{-20,10}})));
 protected
@@ -83,7 +80,7 @@ revisions="<html>
 January 22, 2016, by Michael Wetter:<br/>
 Corrected type declaration of pressure difference.
 This is
-for <a href=\"https://github.com/iea-annex60/modelica-annex60/issues/404\">#404</a>.
+for <a href=\"https://github.com/ibpsa/modelica-ibpsa/issues/404\">#404</a>.
 </li>
 <li>
 June 29, 2014, by Michael Wetter:<br/>

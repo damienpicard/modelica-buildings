@@ -6,7 +6,7 @@ model Overhang "Test model for the overhang"
     azi=Buildings.Types.Azimuth.S,
     til=Buildings.Types.Tilt.Wall) "Solar incidence angle on a tilted surface"
     annotation (Placement(transformation(extent={{-40,0},{-20,20}})));
-  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam="modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos")
+  Buildings.BoundaryConditions.WeatherData.ReaderTMY3 weaDat(filNam=Modelica.Utilities.Files.loadResource("modelica://Buildings/Resources/weatherdata/USA_IL_Chicago-OHare.Intl.AP.725300_TMY3.mos"))
     "Weather data"
     annotation (Placement(transformation(extent={{-100,20},{-80,40}})));
   Buildings.HeatTransfer.Windows.BaseClasses.Overhang ove(
@@ -69,7 +69,7 @@ equation
       index=-1,
       extent={{-6,3},{-6,3}}));
   annotation (
-experiment(StopTime=86400),
+experiment(Tolerance=1e-6, StopTime=86400),
 __Dymola_Commands(file="modelica://Buildings/Resources/Scripts/Dymola/HeatTransfer/Windows/BaseClasses/Examples/Overhang.mos"
         "Simulate and plot"),
 Documentation(info="<html>
