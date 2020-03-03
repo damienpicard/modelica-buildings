@@ -12,7 +12,11 @@ protected
 algorithm
   dT1 :=T_a1 - T_b2;
   dT2 :=T_b1 - T_a2;
-  lmtd :=(dT2 - dT1)/Modelica.Math.log(dT2/dT1);
+  if dT1 == dT2 then
+    lmtd :=dT1;
+  else
+    lmtd :=(dT2 - dT1)/Modelica.Math.log(dT2/dT1);
+  end if;
 annotation (preferredView="info",
 Documentation(info="<html>
 <p>
